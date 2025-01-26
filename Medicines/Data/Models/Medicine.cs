@@ -24,9 +24,11 @@ namespace Medicines.Data.Models
 
         public string ProducingCompany { get; set; } = string.Empty; // اسم الشركة المنتجة
 
-        public decimal Price { get; set; } 
+        public decimal Price { get; set; }
 
-        
+
+        public ICollection<OrderMedicine> OrderMedicines { get; set; } = new List<OrderMedicine>();
+
         public int PharmacyId { get; set; }
         [JsonIgnore]
         public Pharmacics Pharmacy { get; set; }
