@@ -23,7 +23,7 @@ namespace Medicines.Data.Models
         // 🔹 علاقة الصيدلية مع الأدوية (صيدلية تحتوي على عدة أدوية)
         public List<Medicine> Medicines { get; set; }
 
-        public ICollection<Order> Orders { get; set; } = new List<Order>();
+        public List<Order> Orders { get; set; } = new List<Order>();
 
     }
 
