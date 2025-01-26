@@ -21,7 +21,7 @@ namespace Medicines.Data.Models
         public string PharmacistName { get; set; } = string.Empty; // اسم الصيدلاني
 
         // 🔹 علاقة الصيدلية مع الأدوية (صيدلية تحتوي على عدة أدوية)
-        public ICollection<Medicine> Medicines { get; set; } = new List<Medicine>();
+        public List<Medicine> Medicines { get; set; }
     }
 
 

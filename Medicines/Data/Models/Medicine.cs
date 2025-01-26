@@ -1,4 +1,6 @@
-﻿namespace Medicines.Data.Models
+﻿using System.Text.Json.Serialization;
+
+namespace Medicines.Data.Models
 {
     public class Medicine
     {
@@ -22,10 +24,11 @@
 
         public string ProducingCompany { get; set; } = string.Empty; // اسم الشركة المنتجة
 
-        public decimal Price { get; set; } // السعر
+        public decimal Price { get; set; } 
 
-        // 🔹 مفتاح أجنبي يربط الدواء بالصيدلية التي توفره
+        
         public int PharmacyId { get; set; }
+        [JsonIgnore]
         public Pharmacics Pharmacy { get; set; }
     }
 

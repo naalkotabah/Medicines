@@ -18,7 +18,7 @@ namespace Medicines.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // 🔹 تعريف جدول الصيدليات (Pharmacies)
+         
             modelBuilder.Entity<Pharmacics>(entity =>
             {
                 entity.HasKey(p => p.Id);
@@ -37,7 +37,7 @@ namespace Medicines.Data
                       .OnDelete(DeleteBehavior.Cascade); 
             });
 
-            // 🔹 تعريف جدول الأدوية (Medicines)
+    
             modelBuilder.Entity<Medicine>(entity =>
             {
                 entity.HasKey(m => m.Id);

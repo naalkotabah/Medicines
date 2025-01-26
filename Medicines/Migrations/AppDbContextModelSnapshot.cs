@@ -83,7 +83,7 @@ namespace Medicines.Migrations
 
                     b.HasIndex("PharmacyId");
 
-                    b.ToTable("Medicines");
+                    b.ToTable("Medicines", (string)null);
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Pharmacics", b =>
@@ -129,7 +129,7 @@ namespace Medicines.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Pharmacies");
+                    b.ToTable("Pharmacies", (string)null);
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Medicine", b =>

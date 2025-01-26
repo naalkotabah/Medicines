@@ -23,11 +23,15 @@ namespace Medicines.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetPharmacics()
+        public async Task<IActionResult> GetPharmacicsWithMedicines()
         {
-            var Pharmacics = await context.Pharmacies.Include(p => p.Medicines).ToListAsync();
+            var pharmacics = await context.Pharmacies
+                .Include(p => p.Medicines)
+                .ToListAsync();
 
-            return Ok(Pharmacics);
+          
+
+            return Ok(pharmacics);
         }
 
 
