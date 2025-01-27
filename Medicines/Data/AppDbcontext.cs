@@ -1,5 +1,6 @@
 ﻿using Medicines.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Medicines.Data
 {
@@ -24,7 +25,21 @@ namespace Medicines.Data
                 entity.HasKey(u => u.Id);
                 entity.Property(u => u.Name).IsRequired().HasMaxLength(100);
                 entity.Property(u => u.PhoneNumber).HasMaxLength(15);
+
+
+              
+                entity.HasOne(u => u.Role)
+                      .WithMany(r => r.Users)
+                      .HasForeignKey(u => u.RoleId)
+                      .OnDelete(DeleteBehavior.Restrict); // لمنع حذف الأدوار المرتبطة بمستخدمين
             });
+
+            modelBuilder.Entity<Roles>(entity =>
+            {
+                entity.HasKey(r => r.Id);
+                entity.Property(r => r.Name).IsRequired().HasMaxLength(50);
+            });
+
 
             // 🔹 تعريف جدول `Pharmacies`
             modelBuilder.Entity<Pharmacics>(entity =>
@@ -37,6 +52,13 @@ namespace Medicines.Data
                 entity.Property(p => p.Longitude).HasPrecision(10, 7);
                 entity.Property(p => p.LicenseNumber).IsRequired().HasMaxLength(50);
                 entity.Property(p => p.PharmacistName).HasMaxLength(100);
+
+
+                  entity.HasMany(p => p.Medicines)
+                 .WithOne(m => m.Pharmacy)
+                 .HasForeignKey(m => m.PharmacyId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
             });
 
             // 🔹 تعريف جدول `Medicines`
@@ -52,7 +74,10 @@ namespace Medicines.Data
                 entity.Property(m => m.ManufacturerName).HasMaxLength(150);
                 entity.Property(m => m.ProducingCompany).HasMaxLength(150);
                 entity.Property(m => m.Price).HasPrecision(10, 2);
+
+                entity.Property(m => m.PharmacyId).IsRequired();
             });
+
 
             // 🔹 تعريف جدول `Orders`
             modelBuilder.Entity<Order>(entity =>

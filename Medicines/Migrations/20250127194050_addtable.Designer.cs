@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Medicines.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250126211733_addorder")]
-    partial class addorder
+    [Migration("20250127194050_addtable")]
+    partial class addtable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -201,6 +201,24 @@ namespace Medicines.Migrations
                     b.ToTable("Pharmacies");
                 });
 
+            modelBuilder.Entity("Medicines.Data.Models.Roles", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
+
             modelBuilder.Entity("Medicines.Data.Models.Users", b =>
                 {
                     b.Property<int>("Id")
@@ -208,6 +226,9 @@ namespace Medicines.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<bool>("IsDleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -219,7 +240,12 @@ namespace Medicines.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("Users");
                 });
@@ -273,6 +299,17 @@ namespace Medicines.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("Medicines.Data.Models.Users", b =>
+                {
+                    b.HasOne("Medicines.Data.Models.Roles", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("Medicines.Data.Models.Medicine", b =>
                 {
                     b.Navigation("OrderMedicines");
@@ -288,6 +325,11 @@ namespace Medicines.Migrations
                     b.Navigation("Medicines");
 
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("Medicines.Data.Models.Roles", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Users", b =>
