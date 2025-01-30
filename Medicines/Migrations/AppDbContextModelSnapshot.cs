@@ -84,7 +84,7 @@ namespace Medicines.Migrations
 
                     b.HasIndex("PharmacyId");
 
-                    b.ToTable("Medicines");
+                    b.ToTable("Medicines", (string)null);
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Order", b =>
@@ -132,7 +132,7 @@ namespace Medicines.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.OrderMedicine", b =>
@@ -150,7 +150,7 @@ namespace Medicines.Migrations
 
                     b.HasIndex("MedicineId");
 
-                    b.ToTable("OrderMedicines");
+                    b.ToTable("OrderMedicines", (string)null);
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Pharmacics", b =>
@@ -196,7 +196,7 @@ namespace Medicines.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Pharmacies");
+                    b.ToTable("Pharmacies", (string)null);
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Roles", b =>
@@ -214,7 +214,7 @@ namespace Medicines.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Users", b =>
@@ -245,7 +245,7 @@ namespace Medicines.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Medicine", b =>

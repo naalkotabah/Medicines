@@ -16,7 +16,7 @@ namespace Medicines.Data
         public DbSet<Medicine> Medicines { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderMedicine> OrderMedicines { get; set; }
-
+        public DbSet<Roles> Roles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // 🔹 تعريف جدول `Users`
