@@ -26,7 +26,7 @@ namespace Medicines.Data.Models
 
         public decimal Price { get; set; }
 
-
+        [JsonIgnore]
         public ICollection<OrderMedicine> OrderMedicines { get; set; } = new List<OrderMedicine>();
 
         public int PharmacyId { get; set; }

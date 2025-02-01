@@ -24,6 +24,7 @@ namespace Medicines.Controllers
         }
 
         [HttpGet]
+      
         public async Task<IActionResult> GetPharmacics()
         {
             var pharmacics = await _context.Pharmacies
@@ -53,7 +54,7 @@ namespace Medicines.Controllers
 
 
         [HttpPost]
-        [Authorize]
+
         public async Task<IActionResult> AddPharmacics([FromBody] PharmacicsDto model)
         {
          
@@ -69,6 +70,72 @@ namespace Medicines.Controllers
             return Ok(new
             {
                 message = "تمت إضافة الصيدلية بنجاح.",
+                pharmacy = new
+                {
+                    pharmacy.Id,
+                    pharmacy.Name,
+                    pharmacy.Address,
+                    pharmacy.Latitude,
+                    pharmacy.Longitude,
+                    pharmacy.City,
+                    pharmacy.LicenseNumber,
+                    pharmacy.PharmacistName
+                }
+            });
+        }
+
+
+
+        [HttpPut]
+        public async Task<IActionResult> UpdatePharmacy(int id, [FromBody] PharmacicsDto model)
+        {
+            var pharmacy = await _context.Pharmacies.FindAsync(id);
+
+            if (pharmacy == null)
+            {
+                return NotFound(new { message = "لم يتم العثور على الصيدلية." });
+            }
+
+        
+            _mapper.Map(model, pharmacy);
+
+            _context.Pharmacies.Update(pharmacy);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "تم تحديث بيانات الصيدلية بنجاح.",
+                pharmacy = new
+                {
+                    pharmacy.Id,
+                    pharmacy.Name,
+                    pharmacy.Address,
+                    pharmacy.Latitude,
+                    pharmacy.Longitude,
+                    pharmacy.City,
+                    pharmacy.LicenseNumber,
+                    pharmacy.PharmacistName
+                }
+            });
+        }
+
+
+        [HttpDelete]
+        public async Task<IActionResult> DeletePharmacy(int id)
+        {
+            var pharmacy = await _context.Pharmacies.FindAsync(id);
+
+            if (pharmacy == null)
+            {
+                return NotFound(new { message = "لم يتم العثور على الصيدلية." });
+            }
+
+            _context.Pharmacies.Remove(pharmacy);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "تم حذف بيانات الصيدلية بنجاح.",
                 pharmacy = new
                 {
                     pharmacy.Id,

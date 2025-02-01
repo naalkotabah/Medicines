@@ -11,6 +11,10 @@
             CreateMap<Users, UserDto>();
             CreateMap<Pharmacics, PharmacicsDto>();
             CreateMap<PharmacicsDto, Pharmacics>(); // ✅ تحويل DTO إلى كيان
+
+
+            CreateMap<Medicine, medicineDto>();
+            CreateMap<medicineDto, Medicine>();
         }
     }
 
