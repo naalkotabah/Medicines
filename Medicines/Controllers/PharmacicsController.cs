@@ -3,6 +3,10 @@ using Medicines.Data;
 using Medicines.Data.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using System.Linq;
+using Medicines.Data.dto;
 
 namespace Medicines.Controllers
 {
@@ -10,19 +14,20 @@ namespace Medicines.Controllers
     [ApiController]
     public class PharmacicsController : ControllerBase
     {
-        private readonly AppDbContext context;
-        public PharmacicsController(AppDbContext _context)
+        private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
+        public PharmacicsController(AppDbContext context, IMapper mapper)
         {
-            this.context = _context;
-           
+            _context = context;
+            _mapper = mapper;
         }
 
-
         [HttpGet]
-        public IActionResult GetPharmacics()
+        public async Task<IActionResult> GetPharmacics()
         {
-            var Phrancucs = context.Pharmacies.Select(
-                p => new
+            var pharmacics = await _context.Pharmacies
+                .Include(p => p.Medicines) // Load medicines to avoid Lazy Loading issues
+                .Select(p => new
                 {
                     p.Id,
                     p.Name,
@@ -38,14 +43,44 @@ namespace Medicines.Controllers
                         m.ScientificName,
                         m.TradeName,
                         m.ProducingCompany
-                    }).ToList(),
-                });
+                    }).ToList() 
+                })
+                .ToListAsync();
 
-            return Ok(Phrancucs);
+            return Ok(pharmacics);
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> AddPharmacics([FromBody] PharmacicsDto model)
+        {
+         
+        
+
+            
+            var pharmacy = _mapper.Map<Pharmacics>(model);
+
+           
+            await _context.Pharmacies.AddAsync(pharmacy);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "تمت إضافة الصيدلية بنجاح.",
+                pharmacy = new
+                {
+                    pharmacy.Id,
+                    pharmacy.Name,
+                    pharmacy.Address,
+                    pharmacy.Latitude,
+                    pharmacy.Longitude,
+                    pharmacy.City,
+                    pharmacy.LicenseNumber,
+                    pharmacy.PharmacistName
+                }
+            });
+        }
+
+
     }
-
- 
-
-
 }
