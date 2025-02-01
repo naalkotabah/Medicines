@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Linq;
 using Medicines.Data.dto;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Medicines.Controllers
 {
@@ -52,6 +53,7 @@ namespace Medicines.Controllers
 
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddPharmacics([FromBody] PharmacicsDto model)
         {
          
