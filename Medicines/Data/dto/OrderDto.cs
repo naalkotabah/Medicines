@@ -13,6 +13,7 @@ namespace Medicines.Data.dto
         public int PharmacyId { get; set; }
         public List<OrderMedicine> OrderMedicines { get; set; }
 
+
     }
 
 }
