@@ -46,6 +46,7 @@ namespace Medicines.Controllers
         
             var newUser = new Users
             {
+          
                 Name = registerDto.Name,
                 PhoneNumber = registerDto.PhoneNumber,
                 RoleId = registerDto.RoleId,
@@ -65,23 +66,23 @@ namespace Medicines.Controllers
         }
 
         [HttpPost("Login")]
-        public IActionResult Login([FromBody] UserDto UserDto) // ⬅️ استخدام `LoginDto` بدلاً من `Users`
+        public async Task<LoginDto> Login([FromBody] UserDto UserDto)
         {
             var dbUser = context.Users
                 .FirstOrDefault(u => u.Name == UserDto.Name && u.PhoneNumber == UserDto.PhoneNumber && !u.IsDleted);
 
             if (dbUser == null)
             {
-                return Unauthorized(new { message = "Invalid name or phone number" });
+                return null; 
             }
 
-        
             var token = GenerateJwtToken(dbUser);
 
-        
-            var userDto = _mapper.Map<UserDto>(dbUser);
-
-            return Ok(new { token, user = userDto });
+            return new LoginDto
+            {
+                UserId = dbUser.Id,
+                Token = token
+            };
         }
 
 

@@ -9,6 +9,10 @@
         public Mappings()
         {
             CreateMap<Users, UserDto>();
+
+
+            CreateMap<Users, LoginDto>();
+
             CreateMap<Pharmacics, PharmacicsDto>();
             CreateMap<PharmacicsDto, Pharmacics>(); // ✅ تحويل DTO إلى كيان
 

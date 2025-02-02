@@ -16,20 +16,20 @@
 
         public string Address { get; set; }
 
-        // 🔹 العلاقة مع المستخدم (كل طلب يرتبط بمستخدم واحد)
+        
         public int UserId { get; set; }
         public Users User { get; set; }
 
-        // 🔹 العلاقة مع الصيدلية (كل طلب يرتبط بصيدلية واحدة)
+       
         public int PharmacyId { get; set; }
         public Pharmacics Pharmacy { get; set; }
 
-        // 🔹 العلاقة مع الأدوية (كل طلب يحتوي على عدة أدوية)
+ 
         public List<OrderMedicine> OrderMedicines { get; set; } 
 
 
 
-        public decimal FinalPrice { get; set; } // السعر النهائي للطلب
+        public decimal FinalPrice { get; set; } 
     }
 
 }
