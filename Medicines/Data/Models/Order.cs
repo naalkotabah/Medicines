@@ -1,4 +1,6 @@
-﻿namespace Medicines.Data.Models
+﻿using System.Text.Json.Serialization;
+
+namespace Medicines.Data.Models
 {
     public class Order
     {
@@ -24,7 +26,7 @@
         public int PharmacyId { get; set; }
         public Pharmacics Pharmacy { get; set; }
 
- 
+        [JsonIgnore]
         public List<OrderMedicine> OrderMedicines { get; set; } 
 
 
