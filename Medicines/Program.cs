@@ -1,4 +1,4 @@
-using Medicines.Data;
+﻿using Medicines.Data;
 using Medicines.Mapping;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +20,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
+// إضافة خدمة CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        policy =>
+        {
+            policy.WithOrigins("http://127.0.0.1:5500") // السماح بالنطاق المطلوب
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 
 // Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -77,8 +87,10 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
     options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+    options.AddPolicy("PractitionerOnly", policy => policy.RequireRole("Practitioner"));
     options.AddPolicy("AdminOrUser", policy => policy.RequireRole("Admin", "User"));
 });
+
 
 builder.Services.AddAutoMapper(typeof(Mappings));
 
@@ -90,7 +102,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCors("AllowSpecificOrigin");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

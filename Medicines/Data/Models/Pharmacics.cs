@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Medicines.Data.Models
 {
@@ -24,6 +26,11 @@ namespace Medicines.Data.Models
         public List<Medicine> Medicines { get; set; }
 
         public List<Order> Orders { get; set; } = new List<Order>();
+
+        public int PractitionerId { get; set; }
+
+ 
+        public Practitioner Practitioner { get; set; }
 
     }
 

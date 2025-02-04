@@ -1,5 +1,6 @@
 ﻿using Medicines.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Concurrent;
 using System.Data;
 
 namespace Medicines.Data
@@ -17,6 +18,7 @@ namespace Medicines.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderMedicine> OrderMedicines { get; set; }
         public DbSet<Roles> Roles { get; set; }
+        public DbSet<Practitioner> Practitioners { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // 🔹 تعريف جدول `Users`
@@ -26,8 +28,6 @@ namespace Medicines.Data
                 entity.Property(u => u.Name).IsRequired().HasMaxLength(100);
                 entity.Property(u => u.PhoneNumber).HasMaxLength(15);
 
-
-              
                 entity.HasOne(u => u.Role)
                       .WithMany(r => r.Users)
                       .HasForeignKey(u => u.RoleId)
@@ -40,8 +40,16 @@ namespace Medicines.Data
                 entity.Property(r => r.Name).IsRequired().HasMaxLength(50);
             });
 
+            // 🔹 تعريف جدول `Practitioner`
+            modelBuilder.Entity<Practitioner>(entity =>
+            {
+                entity.HasKey(p => p.Id);
+                entity.Property(p => p.NamePractitioner).IsRequired().HasMaxLength(75);
+                entity.Property(p => p.Studies).IsRequired().HasMaxLength(200);
+                entity.Property(p => p.Address).HasMaxLength(100);
+                entity.Property(p => p.PhonNumber).IsRequired().HasMaxLength(50);
+            });
 
-            // 🔹 تعريف جدول `Pharmacies`
             modelBuilder.Entity<Pharmacics>(entity =>
             {
                 entity.HasKey(p => p.Id);
@@ -53,12 +61,17 @@ namespace Medicines.Data
                 entity.Property(p => p.LicenseNumber).IsRequired().HasMaxLength(50);
                 entity.Property(p => p.PharmacistName).HasMaxLength(100);
 
+                // 🔹 تعريف العلاقة One-to-One
+                entity.HasOne(p => p.Practitioner)
+                      .WithOne(pr => pr.Pharmacy)
+                      .HasForeignKey<Pharmacics>(p => p.PractitionerId)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict); // منع حذف الطبيب عند حذف الصيدلية
 
-                  entity.HasMany(p => p.Medicines)
-                 .WithOne(m => m.Pharmacy)
-                 .HasForeignKey(m => m.PharmacyId)
-                 .OnDelete(DeleteBehavior.Cascade);
-
+                entity.HasMany(p => p.Medicines)
+                      .WithOne(m => m.Pharmacy)
+                      .HasForeignKey(m => m.PharmacyId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // 🔹 تعريف جدول `Medicines`
@@ -77,7 +90,6 @@ namespace Medicines.Data
 
                 entity.Property(m => m.PharmacyId).IsRequired();
             });
-
 
             // 🔹 تعريف جدول `Orders`
             modelBuilder.Entity<Order>(entity =>
@@ -117,6 +129,7 @@ namespace Medicines.Data
 
             base.OnModelCreating(modelBuilder);
         }
+
     }
 
 

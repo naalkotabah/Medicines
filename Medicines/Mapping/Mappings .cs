@@ -19,6 +19,8 @@
 
             CreateMap<Medicine, medicineDto>();
             CreateMap<medicineDto, Medicine>();
+
+            CreateMap<PractitionerCreateDto, Practitioner>();
         }
     }
 

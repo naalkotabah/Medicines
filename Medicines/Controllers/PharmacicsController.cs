@@ -24,11 +24,11 @@ namespace Medicines.Controllers
         }
 
         [HttpGet]
-      
         public async Task<IActionResult> GetPharmacics()
         {
             var pharmacics = await _context.Pharmacies
-                .Include(p => p.Medicines) // Load medicines to avoid Lazy Loading issues
+                .Include(p => p.Medicines)
+                .Include(p => p.Practitioner)
                 .Select(p => new
                 {
                     p.Id,
@@ -38,18 +38,34 @@ namespace Medicines.Controllers
                     p.Longitude,
                     p.City,
                     p.LicenseNumber,
-                    p.PharmacistName,
+
                     Medicines = p.Medicines.Select(m => new
                     {
                         m.Id,
                         m.ScientificName,
                         m.TradeName,
                         m.ProducingCompany
-                    }).ToList() 
+                    }).ToList(),
+
+               
+                    Practitioner = p.Practitioner != null ?new
+                    {
+                        p.Practitioner.Id,
+                        p.Practitioner.NamePractitioner
+                    } : null
                 })
                 .ToListAsync();
 
             return Ok(pharmacics);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPharmacics(int id)
+        {
+            var Pharmacies = await _context.Pharmacies.FindAsync(id);
+            if (Pharmacies == null)
+                return NotFound();
+            return Ok(Pharmacies);
         }
 
 
@@ -79,7 +95,8 @@ namespace Medicines.Controllers
                     pharmacy.Longitude,
                     pharmacy.City,
                     pharmacy.LicenseNumber,
-                    pharmacy.PharmacistName
+                    pharmacy.PharmacistName,
+                    pharmacy.PractitionerId
                 }
             });
         }

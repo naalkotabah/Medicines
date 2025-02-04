@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Medicines.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250127194050_addtable")]
+    [Migration("20250204232637_addtable")]
     partial class addtable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -196,9 +196,48 @@ namespace Medicines.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("PractitionerId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("PractitionerId")
+                        .IsUnique();
+
                     b.ToTable("Pharmacies");
+                });
+
+            modelBuilder.Entity("Medicines.Data.Models.Practitioner", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NamePractitioner")
+                        .IsRequired()
+                        .HasMaxLength(75)
+                        .HasColumnType("nvarchar(75)");
+
+                    b.Property<string>("PhonNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Studies")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Practitioners");
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Roles", b =>
@@ -299,6 +338,17 @@ namespace Medicines.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("Medicines.Data.Models.Pharmacics", b =>
+                {
+                    b.HasOne("Medicines.Data.Models.Practitioner", "Practitioner")
+                        .WithOne("Pharmacy")
+                        .HasForeignKey("Medicines.Data.Models.Pharmacics", "PractitionerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Practitioner");
+                });
+
             modelBuilder.Entity("Medicines.Data.Models.Users", b =>
                 {
                     b.HasOne("Medicines.Data.Models.Roles", "Role")
@@ -325,6 +375,11 @@ namespace Medicines.Migrations
                     b.Navigation("Medicines");
 
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("Medicines.Data.Models.Practitioner", b =>
+                {
+                    b.Navigation("Pharmacy");
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Roles", b =>
