@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Medicines.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250204232637_addtable")]
-    partial class addtable
+    [Migration("20250205082717_addTable")]
+    partial class addTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -256,6 +256,23 @@ namespace Medicines.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "User"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Practitioner"
+                        });
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Users", b =>

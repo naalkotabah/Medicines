@@ -127,6 +127,19 @@ namespace Medicines.Data
                 .HasForeignKey(om => om.MedicineId)
                 .OnDelete(DeleteBehavior.Restrict); // ✅ تجنب `Multiple Cascade Paths`
 
+
+            modelBuilder.Entity<Roles>().HasData(
+                new Roles { Id = 1, Name = "User" },
+                new Roles { Id = 2, Name = "Admin" },
+                new Roles { Id = 3, Name = "Practitioner" }
+            );
+
+
+
+
+
+
+
             base.OnModelCreating(modelBuilder);
         }
 
