@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Medicines.Migrations
 {
-    public partial class addTable : Migration
+    public partial class table : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -50,7 +50,6 @@ namespace Medicines.Migrations
                     Longitude = table.Column<decimal>(type: "decimal(10,7)", precision: 10, scale: 7, nullable: false),
                     City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     LicenseNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    PharmacistName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     PractitionerId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

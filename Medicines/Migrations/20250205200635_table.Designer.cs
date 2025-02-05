@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Medicines.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250205082717_addTable")]
-    partial class addTable
+    [Migration("20250205200635_table")]
+    partial class table
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -190,11 +190,6 @@ namespace Medicines.Migrations
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("PharmacistName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("PractitionerId")
                         .HasColumnType("int");

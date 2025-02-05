@@ -59,7 +59,7 @@ namespace Medicines.Data
                 entity.Property(p => p.Latitude).HasPrecision(10, 7);
                 entity.Property(p => p.Longitude).HasPrecision(10, 7);
                 entity.Property(p => p.LicenseNumber).IsRequired().HasMaxLength(50);
-                entity.Property(p => p.PharmacistName).HasMaxLength(100);
+              
 
                 // 🔹 تعريف العلاقة One-to-One
                 entity.HasOne(p => p.Practitioner)

@@ -45,16 +45,43 @@ namespace Medicines.Controllers
             return Ok(practitioners);
         }
 
-
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetPractitioner(int id)
+        [HttpGet("{Practitionersid}")]
+        public async Task<IActionResult> GetMyPharmcic(int Practitionersid)
         {
-            var practitioner = await _context.Practitioners.FindAsync(id);
+            var practitioner = await _context.Practitioners
+                .Where(p => p.Id == Practitionersid) // تصفية النتيجة بناءً على Practitionersid
+                .Include(p => p.Pharmacy) // تضمين بيانات الصيدلية المرتبطة
+                .Select(p => new
+                {
+                    Pharmacy = p.Pharmacy != null ? new
+                    {
+                        p.Pharmacy.Id,
+                        p.Pharmacy.Name,
+                        p.Pharmacy.Address,
+                        p.Pharmacy.Latitude,
+                        p.Pharmacy.Longitude,
+                        p.Pharmacy.City,
+                        p.Pharmacy.LicenseNumber
+                    } : null
+                })
+                .FirstOrDefaultAsync(); // جلب أول نتيجة فقط بدلاً من قائمة
+
             if (practitioner == null)
-                return NotFound();
+            {
+                return NotFound(new { message = "لم يتم العثور على الممارس أو لا يملك صيدلية." });
+            }
+
             return Ok(practitioner);
         }
+
+        //[HttpGet("{id}")]
+        //public async Task<IActionResult> GetPractitioner(int id)
+        //{
+        //    var practitioner = await _context.Practitioners.FindAsync(id);
+        //    if (practitioner == null)
+        //        return NotFound();
+        //    return Ok(practitioner);
+        //}
 
         // إضافة ممارس جديد
         [HttpPost]

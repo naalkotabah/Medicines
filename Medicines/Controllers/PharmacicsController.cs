@@ -62,43 +62,111 @@ namespace Medicines.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPharmacics(int id)
         {
-            var Pharmacies = await _context.Pharmacies.FindAsync(id);
-            if (Pharmacies == null)
-                return NotFound();
-            return Ok(Pharmacies);
-        }
+            var pharmacy = await _context.Pharmacies
+                .Include(p => p.Medicines)  // جلب الأدوية المرتبطة بالصيدلية
+                .Include(p => p.Practitioner) // جلب بيانات المتمرس المرتبط بالصيدلية
+                .Where(p => p.Id == id)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Name,
+                    p.Address,
+                    p.Latitude,
+                    p.Longitude,
+                    p.City,
+                    p.LicenseNumber,
 
+                    Medicines = p.Medicines.Select(m => new
+                    {
+                        m.Id,
+                        m.ScientificName,
+                        m.TradeName,
+                        m.ProducingCompany
+                    }).ToList(),
 
-        [HttpPost]
+                    Practitioner = p.Practitioner != null ? new
+                    {
+                        p.Practitioner.Id,
+                        p.Practitioner.NamePractitioner
+                    } : null
+                })
+                .FirstOrDefaultAsync();
 
-        public async Task<IActionResult> AddPharmacics([FromBody] PharmacicsDto model)
-        {
-         
-        
-
-            
-            var pharmacy = _mapper.Map<Pharmacics>(model);
-
-           
-            await _context.Pharmacies.AddAsync(pharmacy);
-            await _context.SaveChangesAsync();
+            if (pharmacy == null)
+                return NotFound(new { message = "الصيدلية غير موجودة." });
 
             return Ok(new
             {
-                message = "تمت إضافة الصيدلية بنجاح.",
-                pharmacy = new
-                {
-                    pharmacy.Id,
-                    pharmacy.Name,
-                    pharmacy.Address,
-                    pharmacy.Latitude,
-                    pharmacy.Longitude,
-                    pharmacy.City,
-                    pharmacy.LicenseNumber,
-                    pharmacy.PharmacistName,
-                    pharmacy.PractitionerId
-                }
+                message = "تم جلب بيانات الصيدلية بنجاح.",
+                pharmacy
             });
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> AddPharmacics([FromBody] PharmacicsDto model)
+        {
+            if (model == null)
+            {
+                return BadRequest(new { message = "البيانات غير صحيحة." });
+            }
+
+            // التحقق من وجود Practitioner
+            var practitioner = await _context.Practitioners.FindAsync(model.PractitionerId);
+            if (practitioner == null)
+            {
+                return BadRequest(new { message = "الصيدلاني غير موجود" });
+            }
+
+            // التحقق مما إذا كان Practitioner مرتبطًا بصيدلية أخرى
+            bool isPractitionerLinkedToPharmacy = await _context.Pharmacies
+                .AnyAsync(p => p.PractitionerId == model.PractitionerId);
+
+            if (isPractitionerLinkedToPharmacy)
+            {
+                return BadRequest(new { message = "لا يمكن انشاء أكثر من صيدلية لنفس المتمرس." });
+            }
+
+            // تحويل الـ DTO إلى كيان
+            var pharmacy = _mapper.Map<Pharmacics>(model);
+            pharmacy.PractitionerId = model.PractitionerId;
+
+            try
+            {
+                await _context.Pharmacies.AddAsync(pharmacy);
+                await _context.SaveChangesAsync();
+
+                // استرجاع الصيدلية مع المتمرس للتأكد من البيانات المرتبطة
+                var savedPharmacy = await _context.Pharmacies
+                    .Include(p => p.Practitioner)
+                    .FirstOrDefaultAsync(p => p.Id == pharmacy.Id);
+
+                return Ok(new
+                {
+                    message = "تمت إضافة الصيدلية بنجاح.",
+                    pharmacy = new
+                    {
+                        savedPharmacy.Id,
+                        savedPharmacy.Name,
+                        savedPharmacy.Address,
+                        savedPharmacy.Latitude,
+                        savedPharmacy.Longitude,
+                        savedPharmacy.City,
+                        savedPharmacy.LicenseNumber,
+                        PractitionerName = savedPharmacy.Practitioner?.NamePractitioner,
+                        savedPharmacy.PractitionerId
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "حدث خطأ أثناء حفظ البيانات.",
+                    error = ex.InnerException?.Message ?? ex.Message
+                });
+            }
         }
 
 
@@ -131,7 +199,7 @@ namespace Medicines.Controllers
                     pharmacy.Longitude,
                     pharmacy.City,
                     pharmacy.LicenseNumber,
-                    pharmacy.PharmacistName
+       
                 }
             });
         }
@@ -162,7 +230,7 @@ namespace Medicines.Controllers
                     pharmacy.Longitude,
                     pharmacy.City,
                     pharmacy.LicenseNumber,
-                    pharmacy.PharmacistName
+             
                 }
             });
         }

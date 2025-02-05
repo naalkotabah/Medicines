@@ -14,7 +14,7 @@
 
         public string LicenseNumber { get; set; } = string.Empty; // رقم الترخيص
 
-        public string PharmacistName { get; set; } = string.Empty; // اسم الصيدلاني
+      
         public int PractitionerId { get; set; }
 
     }
