@@ -105,6 +105,7 @@ namespace Medicines.Controllers
 
 
         [HttpPost]
+
         public async Task<IActionResult> AddPharmacics([FromBody] PharmacicsDto model)
         {
             if (model == null)
@@ -172,6 +173,7 @@ namespace Medicines.Controllers
 
 
         [HttpPut]
+    
         public async Task<IActionResult> UpdatePharmacy(int id, [FromBody] PharmacicsDto model)
         {
             var pharmacy = await _context.Pharmacies.FindAsync(id);
@@ -206,6 +208,7 @@ namespace Medicines.Controllers
 
 
         [HttpDelete]
+ 
         public async Task<IActionResult> DeletePharmacy(int id)
         {
             var pharmacy = await _context.Pharmacies.FindAsync(id);

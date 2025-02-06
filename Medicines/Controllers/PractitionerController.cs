@@ -2,6 +2,7 @@
 using Medicines.Data;
 using Medicines.Data.dto;
 using Medicines.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +22,7 @@ namespace Medicines.Controllers
             _mapper = mapper;
         }
 
-        // جلب جميع الممارسين
+
         [HttpGet]
         public async Task<IActionResult> GetPractitioners()
         {
@@ -74,17 +75,11 @@ namespace Medicines.Controllers
             return Ok(practitioner);
         }
 
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> GetPractitioner(int id)
-        //{
-        //    var practitioner = await _context.Practitioners.FindAsync(id);
-        //    if (practitioner == null)
-        //        return NotFound();
-        //    return Ok(practitioner);
-        //}
 
-        // إضافة ممارس جديد
+
+      
         [HttpPost]
+
         public async Task<IActionResult> AddPractitioner([FromBody] PractitionerCreateDto practitionerDto)
         {
             if (practitionerDto == null)
@@ -105,8 +100,9 @@ namespace Medicines.Controllers
         }
 
 
-        // تحديث بيانات ممارس
+        
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdatePractitioner(int id, [FromBody] PractitionerCreateDto practitionerDto)
         {
             var existingPractitioner = await _context.Practitioners.FindAsync(id);
@@ -122,8 +118,9 @@ namespace Medicines.Controllers
         }
 
 
-        // حذف ممارس
+   
         [HttpDelete("{id}")]
+
         public async Task<IActionResult> DeletePractitioner(int id)
         {
             var practitioner = await _context.Practitioners
