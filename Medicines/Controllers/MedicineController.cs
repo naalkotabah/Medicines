@@ -2,6 +2,7 @@
 using Medicines.Data;
 using Medicines.Data.dto;
 using Medicines.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -55,6 +56,7 @@ namespace Medicines.Controllers
 
 
         [HttpPost]
+   
         public async Task<IActionResult> AddMedicine([FromBody] medicineDto medicineDto)
         {
             if (medicineDto == null)
@@ -101,6 +103,7 @@ namespace Medicines.Controllers
         }
 
         [HttpPut("{id}")]
+       
         public async Task<IActionResult> UpdateMedicine(int id, [FromBody] medicineDto medicineDto)
         {   
             if (medicineDto == null)
@@ -159,6 +162,7 @@ namespace Medicines.Controllers
 
 
         [HttpDelete]
+       
         public async Task<IActionResult> DeleteMedicine(int id)
         {
             var Medicines = await _context.Medicines.FindAsync(id);
