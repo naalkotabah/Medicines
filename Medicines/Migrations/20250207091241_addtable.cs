@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Medicines.Migrations
 {
-    public partial class table : Migration
+    public partial class addtable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -186,6 +186,11 @@ namespace Medicines.Migrations
                 table: "Roles",
                 columns: new[] { "Id", "Name" },
                 values: new object[] { 3, "Practitioner" });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "IsDleted", "Name", "PhoneNumber", "RoleId" },
+                values: new object[] { 1, false, "Admin", "12345", 2 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Medicines_PharmacyId",

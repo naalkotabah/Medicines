@@ -297,6 +297,16 @@ namespace Medicines.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IsDleted = false,
+                            Name = "Admin",
+                            PhoneNumber = "12345",
+                            RoleId = 2
+                        });
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Medicine", b =>

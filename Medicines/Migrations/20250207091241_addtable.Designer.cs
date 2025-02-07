@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Medicines.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250205200635_table")]
-    partial class table
+    [Migration("20250207091241_addtable")]
+    partial class addtable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -299,6 +299,16 @@ namespace Medicines.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IsDleted = false,
+                            Name = "Admin",
+                            PhoneNumber = "12345",
+                            RoleId = 2
+                        });
                 });
 
             modelBuilder.Entity("Medicines.Data.Models.Medicine", b =>
