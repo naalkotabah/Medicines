@@ -138,9 +138,10 @@ namespace Medicines.Data
             modelBuilder.Entity<Users>().HasData(
                 new Users { Id = 1, Name = "Admin", PhoneNumber = "12345", IsDleted = false, RoleId = 2 }
 
+
             );
 
-
+     
 
 
             base.OnModelCreating(modelBuilder);
