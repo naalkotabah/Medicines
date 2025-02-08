@@ -56,8 +56,7 @@ namespace Medicines.Controllers
 
 
         [HttpPost]
-   
-        public async Task<IActionResult> AddMedicine([FromBody] medicineDto medicineDto)
+        public async Task<IActionResult> AddMedicine([FromForm] medicineDto medicineDto)
         {
             if (medicineDto == null)
             {
@@ -79,21 +78,73 @@ namespace Medicines.Controllers
                 return NotFound(new { message = "لم يتم العثور على الصيدلية المرتبطة بهذا الدواء." });
             }
 
+            string imagePath = null;
+
+            if (medicineDto.ImageMedicine != null)
+            {
+                // السماح فقط بامتداد PNG
+                var allowedExtensions = new[] { ".png" };
+                var fileExtension = Path.GetExtension(medicineDto.ImageMedicine.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(fileExtension))
+                {
+                    return BadRequest(new { message = "يُسمح فقط بتحميل صور بصيغة PNG." });
+                }
+
+                // إنشاء مجلد التخزين إذا لم يكن موجودًا
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                // إنشاء اسم فريد للملف
+                var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                // حفظ الصورة في المجلد
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await medicineDto.ImageMedicine.CopyToAsync(stream);
+                }
+
+                // تعيين المسار النسبي للصورة
+                imagePath = $"/uploads/{fileName}";
+            }
+            else
+            {
+                return BadRequest(new { message = "يجب تحميل صورة الدواء." });
+            }
+
             try
             {
-                // تحويل DTO إلى كيان باستخدام AutoMapper
+                // تحويل DTO إلى كيان وحفظ مسار الصورة
                 var medicine = _mapper.Map<Medicine>(medicineDto);
+                medicine.ImageMedicine = imagePath; // تعيين مسار الصورة في قاعدة البيانات
 
                 await _context.Medicines.AddAsync(medicine);
                 await _context.SaveChangesAsync();
 
-                // تحويل الكيان المحفوظ إلى DTO مرة أخرى للإرجاع
-                var resultDto = _mapper.Map<medicineDto>(medicine);
-
+                // إرجاع البيانات يدويًا بدلاً من AutoMapper
                 return Ok(new
                 {
                     message = "تمت إضافة الدواء بنجاح.",
-                    medicine = resultDto
+                    medicine = new
+                    {
+                        medicine.Id,
+                        medicine.TradeName,
+                        medicine.ScientificName,
+                        medicine.Dosage,
+                        medicine.DrugTiming,
+                        medicine.SideEffects,
+                        medicine.ContraindicatedDrugs,
+                        medicine.ManufacturerName,
+                        medicine.ProducingCompany,
+                        medicine.Price,
+                        medicine.PharmacyId,
+                        ImageMedicine = imagePath // التأكد من إرجاع الصورة
+                    }
                 });
             }
             catch (Exception ex)
@@ -101,6 +152,8 @@ namespace Medicines.Controllers
                 return StatusCode(500, new { message = "حدث خطأ أثناء حفظ البيانات.", error = ex.Message });
             }
         }
+
+
 
         [HttpPut("{id}")]
        

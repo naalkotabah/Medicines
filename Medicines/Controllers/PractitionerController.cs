@@ -77,30 +77,65 @@ namespace Medicines.Controllers
 
 
 
-      
         [HttpPost]
-
-        public async Task<IActionResult> AddPractitioner([FromBody] PractitionerCreateDto practitionerDto)
+        public async Task<IActionResult> AddPractitioner([FromForm] PractitionerCreateDto practitionerDto)
         {
             if (practitionerDto == null)
                 return BadRequest("Invalid data");
 
-            var practitioner = new Practitioner
+            if (practitionerDto.ImagePractitioner != null)
             {
-                NamePractitioner = practitionerDto.NamePractitioner,
-                Address = practitionerDto.Address,
-                PhonNumber = practitionerDto.PhonNumber,
-                Studies = practitionerDto.Studies
-            };
+                // التحقق من نوع الملف
+                var allowedExtensions = new[] { ".png" };
+                var fileExtension = Path.GetExtension(practitionerDto.ImagePractitioner.FileName).ToLower();
 
-            await _context.Practitioners.AddAsync(practitioner);
-            await _context.SaveChangesAsync();
+                if (!allowedExtensions.Contains(fileExtension))
+                {
+                    return BadRequest("Only PNG images are allowed.");
+                }
 
-            return CreatedAtAction(nameof(GetPractitioners), new { id = practitioner.Id }, practitioner);
+                // تحديد المسار داخل مجلد المشروع مباشرة
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+
+                // إنشاء المجلد إذا لم يكن موجودًا
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                // إنشاء اسم ملف فريد
+                var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                // حفظ الملف
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await practitionerDto.ImagePractitioner.CopyToAsync(stream);
+                }
+
+                // إنشاء الكيان وتخزين المسار النسبي
+                var practitioner = new Practitioner
+                {
+                    NamePractitioner = practitionerDto.NamePractitioner,
+                    Address = practitionerDto.Address,
+                    PhonNumber = practitionerDto.PhonNumber,
+                    Studies = practitionerDto.Studies,
+                    ImagePractitioner = $"/uploads/{fileName}" // حفظ المسار النسبي فقط
+                };
+
+                await _context.Practitioners.AddAsync(practitioner);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetPractitioners), new { id = practitioner.Id }, practitioner);
+            }
+
+            return BadRequest("Image is required.");
         }
 
 
-        
+
+
+
         [HttpPut("{id}")]
         [Authorize]
         public async Task<IActionResult> UpdatePractitioner(int id, [FromBody] PractitionerCreateDto practitionerDto)

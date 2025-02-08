@@ -15,9 +15,9 @@ namespace Medicines.Data.Models
         public decimal Latitude { get; set; } // الإحداثيات الجغرافية
 
         public decimal Longitude { get; set; }
-
+        public string ImagePharmacics { get; set; } 
         public string City { get; set; } = string.Empty; // المدينة
-
+        public bool IsActive { get; set; }
         public string LicenseNumber { get; set; } = string.Empty; // رقم الترخيص
 
        

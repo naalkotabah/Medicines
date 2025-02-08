@@ -17,8 +17,13 @@
             CreateMap<PharmacicsDto, Pharmacics>(); // ✅ تحويل DTO إلى كيان
 
 
-            CreateMap<Medicine, medicineDto>();
-            CreateMap<medicineDto, Medicine>();
+         
+            CreateMap<medicineDto, Medicine>()
+                .ForMember(dest => dest.ImageMedicine, opt => opt.Ignore()); 
+
+   
+            CreateMap<Medicine, medicineDto>()
+                .ForMember(dest => dest.ImageMedicine, opt => opt.Ignore());
 
             CreateMap<PractitionerCreateDto, Practitioner>();
         }

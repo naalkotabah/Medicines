@@ -11,7 +11,7 @@
         public decimal Longitude { get; set; }
 
         public string City { get; set; } = string.Empty; // المدينة
-
+        public IFormFile? ImagePharmacics { get; set; }
         public string LicenseNumber { get; set; } = string.Empty; // رقم الترخيص
 
       
