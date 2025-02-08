@@ -28,42 +28,57 @@ namespace Medicines.Controllers
         }
 
         [HttpPost("Register")]
-        public IActionResult Register([FromBody] RegisterDto registerDto)
+        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-           
-            if (context.Users.Any(u => u.PhoneNumber == registerDto.PhoneNumber))
+            if (registerDto == null)
             {
-                return BadRequest(new { message = "User with this phone number already exists" });
+                return BadRequest(new { message = "Invalid request data" });
             }
 
-       
-            var role = context.Roles.FirstOrDefault(r => r.Id == registerDto.RoleId);
-            if (role == null)
+            // التحقق من صحة البيانات
+            if (string.IsNullOrWhiteSpace(registerDto.Name) ||
+                string.IsNullOrWhiteSpace(registerDto.PhoneNumber) 
+              )
             {
-                return BadRequest(new { message = "Invalid RoleId" });
+                return BadRequest(new { message = "All fields are required" });
             }
 
-        
-            var newUser = new Users
+            try
             {
+               
+                if (await context.Users.AnyAsync(u => u.PhoneNumber == registerDto.PhoneNumber))
+                {
+                    return BadRequest(new { message = "هذا الرقم مستعمل بل قعل" });
+                }
+
           
-                Name = registerDto.Name,
-                PhoneNumber = registerDto.PhoneNumber,
-                RoleId = registerDto.RoleId,
-                Role = role,
-                IsDleted = false 
-            };
 
-            context.Users.Add(newUser);
-            context.SaveChanges();
+                // إنشاء المستخدم الجديد
+                var newUser = new Users
+                {
+                    Name = registerDto.Name,
+                    PhoneNumber = registerDto.PhoneNumber,
+                    RoleId = 1, //User
+                    IsDleted = false // يجب التأكد أن هذا الحقل لا يؤثر على الاستعلامات المستقبلية
+                };
 
-            var token = GenerateJwtToken(newUser);
+                context.Users.Add(newUser);
+                await context.SaveChangesAsync();
 
-     
-            var userDto = _mapper.Map<UserDto>(newUser);
+                // إنشاء التوكن
+                var token = GenerateJwtToken(newUser);
 
-            return Ok(new { message = "User registered successfully", token, user = userDto });
+                // تحويل المستخدم إلى UserDto
+                var userDto = _mapper.Map<UserDto>(newUser);
+
+                return Ok(new { message = "User registered successfully", token, user = userDto });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while processing your request", error = ex.Message });
+            }
         }
+
 
         [HttpPost("Login")]
         public async Task<LoginDto> Login([FromBody] UserDto UserDto)
