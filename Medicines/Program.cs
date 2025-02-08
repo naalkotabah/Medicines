@@ -1,6 +1,8 @@
 ﻿using Medicines.Data;
 using Medicines.Mapping;
+using Medicines.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -102,6 +104,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
 app.UseCors("AllowSpecificOrigin");
 app.UseHttpsRedirection();
 
