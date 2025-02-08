@@ -23,6 +23,7 @@ namespace Medicines.Data.Models
         public string ManufacturerName { get; set; } = string.Empty; // اسم المصنع
 
         public string ProducingCompany { get; set; } = string.Empty; // اسم الشركة المنتجة
+        public DateTime? ExpiryDate { get; set; }
 
         public decimal Price { get; set; }
 

@@ -9,6 +9,7 @@ namespace Medicines.Data.Models
         public string Address { get; set; }
         public string PhonNumber { get; set; }
         public string Studies { get; set; }
+        public bool? IsDleted { get; set; }
 
         // 🔹 علاقة One-to-One إلزامية
         public Pharmacics? Pharmacy { get; set; }
