@@ -35,6 +35,7 @@ namespace Medicines.Controllers
                     p.NamePractitioner,
                     p.Address,
                     p.PhonNumber,
+                     p.Studies,
                     Pharmacy = p.Pharmacy != null ? new
                     {
                         p.Pharmacy.Id,
