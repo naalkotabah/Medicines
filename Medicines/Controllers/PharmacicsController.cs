@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Medicines.Data.dto;
 using Microsoft.AspNetCore.Authorization;
+using Medicines.Services;
 
 namespace Medicines.Controllers
 {
@@ -111,62 +112,44 @@ namespace Medicines.Controllers
             if (model.ImagePharmacics == null || model.ImagePharmacics.Length == 0)
                 return BadRequest("يجب رفع صورة للصيدلية");
 
-            // ✅ السماح فقط بملفات PNG
-            var allowedExtension = ".png";
-            var fileExtension = Path.GetExtension(model.ImagePharmacics.FileName).ToLower();
-
-            if (fileExtension != allowedExtension)
-                return BadRequest("يُسمح فقط بملفات PNG.");
-
-            // ✅ تحديد مجلد حفظ الصور داخل المشروع
+            
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+            var fileUploadService = new FileUploadService(uploadsFolder);
 
-            // ✅ التأكد من أن المجلد موجود، وإن لم يكن، يتم إنشاؤه
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-
-            // ✅ إنشاء اسم فريد للملف لتجنب التكرار
-            var fileName = $"{Guid.NewGuid()}{fileExtension}";
-            var filePath = Path.Combine(uploadsFolder, fileName);
-
-            // ✅ حفظ الصورة في المجلد
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            string fileName;
+            try
             {
-                await model.ImagePharmacics.CopyToAsync(stream);
+                fileName = await fileUploadService.UploadImageAsync(model.ImagePharmacics);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
 
+            // التحقق من صحة البيانات
             if (model == null)
-            {
                 return BadRequest(new { message = "البيانات غير صحيحة." });
-            }
 
-            // ✅ التحقق من وجود Practitioner
             var practitioner = await _context.Practitioners.FindAsync(model.PractitionerId);
             if (practitioner == null)
-            {
                 return BadRequest(new { message = "الصيدلاني غير موجود" });
-            }
 
-            // ✅ التحقق مما إذا كان Practitioner مرتبطًا بصيدلية أخرى
             bool isPractitionerLinkedToPharmacy = await _context.Pharmacies
                 .AnyAsync(p => p.PractitionerId == model.PractitionerId);
 
             if (isPractitionerLinkedToPharmacy)
-            {
                 return BadRequest(new { message = "لا يمكن انشاء أكثر من صيدلية لنفس المتمرس." });
-            }
 
-            // ✅ تحويل الـ DTO إلى كيان
+            // تحويل الـ DTO إلى كيان
             var pharmacy = _mapper.Map<Pharmacics>(model);
             pharmacy.PractitionerId = model.PractitionerId;
-            pharmacy.ImagePharmacics = fileName; // ✅ حفظ اسم الصورة فقط في قاعدة البيانات
+            pharmacy.ImagePharmacics = fileName; // حفظ اسم الصورة فقط
 
             try
             {
                 await _context.Pharmacies.AddAsync(pharmacy);
                 await _context.SaveChangesAsync();
 
-                // ✅ استرجاع الصيدلية مع المتمرس
                 var savedPharmacy = await _context.Pharmacies
                     .Include(p => p.Practitioner)
                     .FirstOrDefaultAsync(p => p.Id == pharmacy.Id);
@@ -183,7 +166,7 @@ namespace Medicines.Controllers
                         savedPharmacy.Longitude,
                         savedPharmacy.City,
                         savedPharmacy.LicenseNumber,
-                        savedPharmacy.ImagePharmacics, // ✅ إرجاع اسم الصورة
+                        savedPharmacy.ImagePharmacics,
                         PractitionerName = savedPharmacy.Practitioner?.NamePractitioner,
                         savedPharmacy.PractitionerId
                     }
@@ -198,6 +181,7 @@ namespace Medicines.Controllers
                 });
             }
         }
+
 
 
         [HttpPut]

@@ -2,6 +2,7 @@
 using Medicines.Data;
 using Medicines.Data.dto;
 using Medicines.Data.Models;
+using Medicines.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -78,55 +79,35 @@ namespace Medicines.Controllers
                 return NotFound(new { message = "لم يتم العثور على الصيدلية المرتبطة بهذا الدواء." });
             }
 
-            string imagePath = null;
-
-            if (medicineDto.ImageMedicine != null)
-            {
-                // السماح فقط بامتداد PNG
-                var allowedExtensions = new[] { ".png" };
-                var fileExtension = Path.GetExtension(medicineDto.ImageMedicine.FileName).ToLower();
-
-                if (!allowedExtensions.Contains(fileExtension))
-                {
-                    return BadRequest(new { message = "يُسمح فقط بتحميل صور بصيغة PNG." });
-                }
-
-                // إنشاء مجلد التخزين إذا لم يكن موجودًا
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-
-                // إنشاء اسم فريد للملف
-                var fileName = $"{Guid.NewGuid()}{fileExtension}";
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                // حفظ الصورة في المجلد
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await medicineDto.ImageMedicine.CopyToAsync(stream);
-                }
-
-                // تعيين المسار النسبي للصورة
-                imagePath = $"/uploads/{fileName}";
-            }
-            else
+            if (medicineDto.ImageMedicine == null || medicineDto.ImageMedicine.Length == 0)
             {
                 return BadRequest(new { message = "يجب تحميل صورة الدواء." });
             }
 
+            // 1️⃣ إنشاء كائن من `FileUploadService` وتمرير المسار
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+            var fileUploadService = new FileUploadService(uploadsFolder);
+
+            string fileName;
             try
             {
-                // تحويل DTO إلى كيان وحفظ مسار الصورة
+                // 2️⃣ استدعاء `UploadImageAsync` لحفظ الصورة
+                fileName = await fileUploadService.UploadImageAsync(medicineDto.ImageMedicine);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+
+            try
+            {
+                // 3️⃣ تحويل DTO إلى كيان وحفظ اسم الصورة فقط
                 var medicine = _mapper.Map<Medicine>(medicineDto);
-                medicine.ImageMedicine = imagePath; // تعيين مسار الصورة في قاعدة البيانات
+                medicine.ImageMedicine = $"/uploads/{fileName}";
 
                 await _context.Medicines.AddAsync(medicine);
                 await _context.SaveChangesAsync();
 
-                // إرجاع البيانات يدويًا بدلاً من AutoMapper
                 return Ok(new
                 {
                     message = "تمت إضافة الدواء بنجاح.",
@@ -143,7 +124,7 @@ namespace Medicines.Controllers
                         medicine.ProducingCompany,
                         medicine.Price,
                         medicine.PharmacyId,
-                        ImageMedicine = imagePath // التأكد من إرجاع الصورة
+                        ImageMedicine = medicine.ImageMedicine
                     }
                 });
             }

@@ -2,6 +2,7 @@
 using Medicines.Data;
 using Medicines.Data.dto;
 using Medicines.Data.Models;
+using Medicines.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -83,53 +84,49 @@ namespace Medicines.Controllers
             if (practitionerDto == null)
                 return BadRequest("Invalid data");
 
-            if (practitionerDto.ImagePractitioner != null)
+            if (practitionerDto.ImagePractitioner == null || practitionerDto.ImagePractitioner.Length == 0)
+                return BadRequest("Image is required.");
+
+            // 1️⃣ إنشاء كائن من `FileUploadService` وتمرير المسار
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+            var fileUploadService = new FileUploadService(uploadsFolder);
+
+            string fileName;
+            try
             {
-                // التحقق من نوع الملف
-                var allowedExtensions = new[] { ".png" };
-                var fileExtension = Path.GetExtension(practitionerDto.ImagePractitioner.FileName).ToLower();
+                // 2️⃣ استدعاء `UploadImageAsync` لحفظ الصورة
+                fileName = await fileUploadService.UploadImageAsync(practitionerDto.ImagePractitioner);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
 
-                if (!allowedExtensions.Contains(fileExtension))
-                {
-                    return BadRequest("Only PNG images are allowed.");
-                }
+            // 3️⃣ إنشاء الكيان وتخزين اسم الملف فقط
+            var practitioner = new Practitioner
+            {
+                NamePractitioner = practitionerDto.NamePractitioner,
+                Address = practitionerDto.Address,
+                PhonNumber = practitionerDto.PhonNumber,
+                Studies = practitionerDto.Studies,
+                ImagePractitioner = $"/uploads/{fileName}" // حفظ المسار النسبي
+            };
 
-                // تحديد المسار داخل مجلد المشروع مباشرة
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-
-                // إنشاء المجلد إذا لم يكن موجودًا
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-
-                // إنشاء اسم ملف فريد
-                var fileName = $"{Guid.NewGuid()}{fileExtension}";
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                // حفظ الملف
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await practitionerDto.ImagePractitioner.CopyToAsync(stream);
-                }
-
-                // إنشاء الكيان وتخزين المسار النسبي
-                var practitioner = new Practitioner
-                {
-                    NamePractitioner = practitionerDto.NamePractitioner,
-                    Address = practitionerDto.Address,
-                    PhonNumber = practitionerDto.PhonNumber,
-                    Studies = practitionerDto.Studies,
-                    ImagePractitioner = $"/uploads/{fileName}" // حفظ المسار النسبي فقط
-                };
-
+            try
+            {
                 await _context.Practitioners.AddAsync(practitioner);
                 await _context.SaveChangesAsync();
 
                 return CreatedAtAction(nameof(GetPractitioners), new { id = practitioner.Id }, practitioner);
             }
-
-            return BadRequest("Image is required.");
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "حدث خطأ أثناء حفظ البيانات.",
+                    error = ex.InnerException?.Message ?? ex.Message
+                });
+            }
         }
 
 
