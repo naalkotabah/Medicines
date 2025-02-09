@@ -9,20 +9,18 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ✅ 1️⃣ إعداد الاتصال بقاعدة البيانات
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("myconnection")));
 
-
-//Connections string for database 
-builder.Services.AddDbContext<AppDbContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("myconnection")));
+// ✅ 2️⃣ إضافة الخدمات الأساسية
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// إضافة خدمة CORS
+// ✅ 3️⃣ تمكين CORS (السماح بطلبات محددة)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -34,7 +32,7 @@ builder.Services.AddCors(options =>
         });
 });
 
-// Configure JWT Authentication
+// ✅ 4️⃣ إعداد المصادقة باستخدام JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -51,6 +49,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// ✅ 5️⃣ إعداد Swagger لدعم المصادقة JWT
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -83,8 +82,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-
-// Configure Authorization Policies
+// ✅ 6️⃣ إعداد سياسات التصريح (Authorization)
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
@@ -93,20 +91,24 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOrUser", policy => policy.RequireRole("Admin", "User"));
 });
 
-
+// ✅ 7️⃣ إضافة AutoMapper
 builder.Services.AddAutoMapper(typeof(Mappings));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ✅ 8️⃣ تشغيل Swagger فقط في بيئة التطوير
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// ✅ 9️⃣ استخدام Middleware لمعالجة الأخطاء في جميع البيئات
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
+// ✅ 1️⃣0️⃣ تمكين CORS (يجب أن يكون قبل المصادقة والتخويل)
 app.UseCors("AllowSpecificOrigin");
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
