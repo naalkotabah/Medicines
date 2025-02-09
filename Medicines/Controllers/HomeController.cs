@@ -35,31 +35,27 @@ namespace Medicines.Controllers
                 return BadRequest(new { message = "Invalid request data" });
             }
 
-            // التحقق من صحة البيانات
-            if (string.IsNullOrWhiteSpace(registerDto.Name) ||
-                string.IsNullOrWhiteSpace(registerDto.PhoneNumber) 
-              )
+            // التحقق من صحة البيانات (يجب إدخال الاسم وكلمة المرور فقط)
+            if (string.IsNullOrWhiteSpace(registerDto.Name) || string.IsNullOrWhiteSpace(registerDto.Password))
             {
-                return BadRequest(new { message = "All fields are required" });
+                return BadRequest(new { message = "Name and password are required" });
             }
 
             try
             {
-               
-                if (await context.Users.AnyAsync(u => u.PhoneNumber == registerDto.PhoneNumber))
+                // التحقق من عدم وجود نفس الاسم مسبقًا
+                if (await context.Users.AnyAsync(u => u.Name == registerDto.Name))
                 {
-                    return BadRequest(new { message = "هذا الرقم مستعمل بل قعل" });
+                    return BadRequest(new { message = "This username is already taken" });
                 }
-
-          
 
                 // إنشاء المستخدم الجديد
                 var newUser = new Users
                 {
                     Name = registerDto.Name,
-                    PhoneNumber = registerDto.PhoneNumber,
-                    RoleId = 1, //User
-                    IsDleted = false // يجب التأكد أن هذا الحقل لا يؤثر على الاستعلامات المستقبلية
+                    Password = registerDto.Password,
+                    RoleId = 1, // ثابت: مستخدم عادي
+                    IsDleted = false // الحفاظ على القيم الافتراضية
                 };
 
                 context.Users.Add(newUser);
@@ -71,7 +67,7 @@ namespace Medicines.Controllers
                 // تحويل المستخدم إلى UserDto
                 var userDto = _mapper.Map<UserDto>(newUser);
 
-                return Ok(new { message = "User registered successfully", token, user = userDto });
+                return Ok(new { message = "User registered successfully", token});
             }
             catch (Exception ex)
             {
@@ -80,25 +76,32 @@ namespace Medicines.Controllers
         }
 
 
+
         [HttpPost("Login")]
-        public async Task<LoginDto> Login([FromBody] UserDto UserDto)
+        public async Task<IActionResult> Login([FromBody] UserDto userDto)
         {
-            var dbUser = context.Users
-                .FirstOrDefault(u => u.Name == UserDto.Name && u.PhoneNumber == UserDto.PhoneNumber && !u.IsDleted);
+            if (userDto == null || string.IsNullOrWhiteSpace(userDto.Name) || string.IsNullOrWhiteSpace(userDto.Password))
+            {
+                return BadRequest(new { message = "Name and password are required" });
+            }
+
+            var dbUser = await context.Users
+                .FirstOrDefaultAsync(u => u.Name == userDto.Name && u.Password == userDto.Password && !u.IsDleted);
 
             if (dbUser == null)
             {
-                return null; 
+                return Unauthorized(new { message = "Invalid username or password" });
             }
 
             var token = GenerateJwtToken(dbUser);
 
-            return new LoginDto
+            return Ok(new LoginDto
             {
                 UserId = dbUser.Id,
                 Token = token
-            };
+            });
         }
+
 
 
 
@@ -114,7 +117,7 @@ namespace Medicines.Controllers
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Name),
-                new Claim("PhoneNumber", user.PhoneNumber) // تخزين رقم الهاتف داخل التوكن
+             
             };
 
             // إضافة الدور إذا كان متوفراً

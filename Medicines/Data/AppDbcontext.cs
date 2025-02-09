@@ -26,7 +26,7 @@ namespace Medicines.Data
             {
                 entity.HasKey(u => u.Id);
                 entity.Property(u => u.Name).IsRequired().HasMaxLength(100);
-                entity.Property(u => u.PhoneNumber).HasMaxLength(15);
+                entity.Property(u => u.Password).IsRequired().HasMaxLength(10);
 
                 entity.HasOne(u => u.Role)
                       .WithMany(r => r.Users)
@@ -136,7 +136,7 @@ namespace Medicines.Data
 
 
             modelBuilder.Entity<Users>().HasData(
-                new Users { Id = 1, Name = "Admin", PhoneNumber = "12345", IsDleted = false, RoleId = 2 }
+                new Users { Id = 1, Name = "Admin", Password = "12345", IsDleted = false, RoleId = 2 }
 
 
             );
