@@ -363,6 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 Migrations/
-appsettings.json
-appsettings.*.json
+Medicines/appsettings.json 
 
