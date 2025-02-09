@@ -135,11 +135,9 @@ namespace Medicines.Controllers
         }
 
 
-
         [HttpPut("{id}")]
-       
-        public async Task<IActionResult> UpdateMedicine(int id, [FromBody] medicineDto medicineDto)
-        {   
+        public async Task<IActionResult> UpdateMedicine(int id, [FromForm] medicineDto medicineDto)
+        {
             if (medicineDto == null)
             {
                 return BadRequest(new { message = "بيانات الدواء غير صحيحة." });
@@ -173,19 +171,52 @@ namespace Medicines.Controllers
 
             try
             {
-                // تحديث بيانات الدواء باستخدام AutoMapper
+                string fileName = existingMedicine.ImageMedicine; // الاحتفاظ بالصورة القديمة
+
+                if (medicineDto.ImageMedicine != null && medicineDto.ImageMedicine.Length > 0)
+                {
+                    // 1️⃣ حذف الصورة القديمة إذا كانت موجودة
+                    if (!string.IsNullOrEmpty(existingMedicine.ImageMedicine))
+                    {
+                        string oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), existingMedicine.ImageMedicine.TrimStart('/'));
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+                    }
+
+                    // 2️⃣ حفظ الصورة الجديدة
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+                    var fileUploadService = new FileUploadService(uploadsFolder);
+                    fileName = await fileUploadService.UploadImageAsync(medicineDto.ImageMedicine);
+                    fileName = $"/uploads/{fileName}";
+                }
+
+                // 3️⃣ تحديث بيانات الدواء
                 _mapper.Map(medicineDto, existingMedicine);
+                existingMedicine.ImageMedicine = fileName; // تحديث الصورة الجديدة أو الاحتفاظ بالقديمة
 
-                // حفظ التعديلات في قاعدة البيانات
+                // 4️⃣ حفظ التعديلات في قاعدة البيانات
                 await _context.SaveChangesAsync();
-
-                // تحويل الكيان المعدل إلى DTO للإرجاع
-                var resultDto = _mapper.Map<medicineDto>(existingMedicine);
 
                 return Ok(new
                 {
                     message = "تم تحديث بيانات الدواء بنجاح.",
-                    medicine = resultDto
+                    medicine = new
+                    {
+                        existingMedicine.Id,
+                        existingMedicine.TradeName,
+                        existingMedicine.ScientificName,
+                        existingMedicine.Dosage,
+                        existingMedicine.DrugTiming,
+                        existingMedicine.SideEffects,
+                        existingMedicine.ContraindicatedDrugs,
+                        existingMedicine.ManufacturerName,
+                        existingMedicine.ProducingCompany,
+                        existingMedicine.Price,
+                        existingMedicine.PharmacyId,
+                        ImageMedicine = existingMedicine.ImageMedicine
+                    }
                 });
             }
             catch (Exception ex)
@@ -193,6 +224,7 @@ namespace Medicines.Controllers
                 return StatusCode(500, new { message = "حدث خطأ أثناء تحديث البيانات.", error = ex.Message });
             }
         }
+
 
 
         [HttpDelete]

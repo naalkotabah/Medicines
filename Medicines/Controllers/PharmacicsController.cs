@@ -184,9 +184,8 @@ namespace Medicines.Controllers
 
 
 
-        [HttpPut]
-    
-        public async Task<IActionResult> UpdatePharmacy(int id, [FromBody] PharmacicsDto model)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdatePharmacy(int id, [FromForm] PharmacicsDto model)
         {
             var pharmacy = await _context.Pharmacies.FindAsync(id);
 
@@ -195,28 +194,62 @@ namespace Medicines.Controllers
                 return NotFound(new { message = "لم يتم العثور على الصيدلية." });
             }
 
-        
-            _mapper.Map(model, pharmacy);
-
-            _context.Pharmacies.Update(pharmacy);
-            await _context.SaveChangesAsync();
-
-            return Ok(new
+            try
             {
-                message = "تم تحديث بيانات الصيدلية بنجاح.",
-                pharmacy = new
+                string fileName = pharmacy.ImagePharmacics; // الاحتفاظ بالصورة القديمة
+
+                if (model.ImagePharmacics != null && model.ImagePharmacics.Length > 0)
                 {
-                    pharmacy.Id,
-                    pharmacy.Name,
-                    pharmacy.Address,
-                    pharmacy.Latitude,
-                    pharmacy.Longitude,
-                    pharmacy.City,
-                    pharmacy.LicenseNumber,
-       
+                    // 1️⃣ حذف الصورة القديمة إذا كانت موجودة
+                    if (!string.IsNullOrEmpty(pharmacy.ImagePharmacics))
+                    {
+                        string oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), pharmacy.ImagePharmacics.TrimStart('/'));
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+                    }
+
+                    // 2️⃣ حفظ الصورة الجديدة
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+                    var fileUploadService = new FileUploadService(uploadsFolder);
+                    fileName = await fileUploadService.UploadImageAsync(model.ImagePharmacics);
+                    fileName = $"/uploads/{fileName}";
                 }
-            });
+
+                // 3️⃣ تحديث البيانات مع الصورة الجديدة (إذا كانت مرفوعة)
+                _mapper.Map(model, pharmacy);
+                pharmacy.ImagePharmacics = fileName; // تحديث الصورة الجديدة أو الإبقاء على القديمة
+
+                _context.Pharmacies.Update(pharmacy);
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    message = "تم تحديث بيانات الصيدلية بنجاح.",
+                    pharmacy = new
+                    {
+                        pharmacy.Id,
+                        pharmacy.Name,
+                        pharmacy.Address,
+                        pharmacy.Latitude,
+                        pharmacy.Longitude,
+                        pharmacy.City,
+                        pharmacy.LicenseNumber,
+                        pharmacy.ImagePharmacics // إرجاع رابط الصورة الجديدة أو القديمة
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "حدث خطأ أثناء تحديث البيانات.",
+                    error = ex.InnerException?.Message ?? ex.Message
+                });
+            }
         }
+
 
 
         [HttpDelete]

@@ -135,23 +135,58 @@ namespace Medicines.Controllers
 
 
         [HttpPut("{id}")]
-        [Authorize]
-        public async Task<IActionResult> UpdatePractitioner(int id, [FromBody] PractitionerCreateDto practitionerDto)
+
+        public async Task<IActionResult> UpdatePractitioner(int id, [FromForm] PractitionerCreateDto practitionerDto)
         {
             var existingPractitioner = await _context.Practitioners.FindAsync(id);
             if (existingPractitioner == null)
-                return NotFound();
+                return NotFound(new { message = "لم يتم العثور على الطبيب." });
 
-            // تحديث القيم باستخدام AutoMapper
-            _mapper.Map(practitionerDto, existingPractitioner);
+            try
+            {
+                string fileName = existingPractitioner.ImagePractitioner; // احتفاظ بالصورة الحالية
 
-            await _context.SaveChangesAsync();
+                if (practitionerDto.ImagePractitioner != null && practitionerDto.ImagePractitioner.Length > 0)
+                {
+                    // 1️⃣ حذف الصورة القديمة إذا كانت موجودة
+                    if (!string.IsNullOrEmpty(existingPractitioner.ImagePractitioner))
+                    {
+                        string oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), existingPractitioner.ImagePractitioner.TrimStart('/'));
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+                    }
 
-            return Ok(existingPractitioner);
+                    // 2️⃣ حفظ الصورة الجديدة
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+                    var fileUploadService = new FileUploadService(uploadsFolder);
+                    fileName = await fileUploadService.UploadImageAsync(practitionerDto.ImagePractitioner);
+                    fileName = $"/uploads/{fileName}";
+                }
+
+                // 3️⃣ تحديث البيانات مع الصورة الجديدة (إذا كانت مرفوعة)
+                existingPractitioner.NamePractitioner = practitionerDto.NamePractitioner;
+                existingPractitioner.Address = practitionerDto.Address;
+                existingPractitioner.PhonNumber = practitionerDto.PhonNumber;
+                existingPractitioner.Studies = practitionerDto.Studies;
+                existingPractitioner.ImagePractitioner = fileName; // تحديث المسار الجديد أو الإبقاء على القديم
+
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "تم تحديث بيانات الطبيب بنجاح.", practitioner = existingPractitioner });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "حدث خطأ أثناء تحديث البيانات.",
+                    error = ex.InnerException?.Message ?? ex.Message
+                });
+            }
         }
 
 
-   
+
         [HttpDelete("{id}")]
 
         public async Task<IActionResult> DeletePractitioner(int id)
