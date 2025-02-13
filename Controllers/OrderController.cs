@@ -87,7 +87,31 @@ namespace Medicines.Controllers
         }
 
 
-   
+        [HttpGet]
+        public async Task<IActionResult> GetOrders()
+        {
+            var orders = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.Pharmacy)
+                .Include(o => o.OrderMedicines)
+                .ThenInclude(om => om.Medicine)
+                .Select(o => new
+                {
+                    OrderId = o.Id,
+                    CustomerName = o.User.Name, // اسم العميل
+                    PharmacyName = o.Pharmacy.Name, // اسم الصيدلية
+                    FinalPrice = o.FinalPrice, // السعر النهائي
+                    Medicines = o.OrderMedicines.Select(om => new
+                    {
+                        MedicineName = om.Medicine.TradeName, // اسم الدواء
+                     
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return Ok(orders);
+        }
+
 
     }
 }

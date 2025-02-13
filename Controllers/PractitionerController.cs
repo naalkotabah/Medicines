@@ -49,6 +49,23 @@ namespace Medicines.Controllers
             return Ok(practitioners);
         }
 
+        [HttpGet]
+        [Route("GetForselect")]
+        public async Task<IActionResult> GetPractitioners_Forselected()
+        {
+            var practitioners = await _context.Practitioners
+                .Include(p => p.Pharmacy)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.NamePractitioner,
+                
+                })
+                .ToListAsync();
+
+            return Ok(practitioners);
+        }
+
         [HttpGet("{Practitionersid}")]
         public async Task<IActionResult> GetMyPharmcic(int Practitionersid)
         {

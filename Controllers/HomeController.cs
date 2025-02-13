@@ -111,6 +111,7 @@ namespace Medicines.Controllers
             var users = await context.Users
                 .Select(u => new
                 {
+               u.Id,
                u.Name,
                u.IsDleted,
                u.RoleId
