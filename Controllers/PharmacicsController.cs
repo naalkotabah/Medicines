@@ -36,6 +36,7 @@ namespace Medicines.Controllers
                     p.Name,
                     p.Address,
                     p.Latitude,
+                    p.ImagePharmacics,
                     p.Longitude,
                     p.City,
                     p.LicenseNumber,

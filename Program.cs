@@ -4,6 +4,7 @@ using Medicines.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
@@ -82,6 +83,8 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
+
 // ✅ 6️⃣ إعداد سياسات التصريح (Authorization)
 builder.Services.AddAuthorization(options =>
 {
@@ -110,6 +113,13 @@ app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseCors("AllowSpecificOrigin");
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(@"C:\Users\Nael\source\repos\Medicines\uploads"),
+    RequestPath = "/uploads"
+});
+
 
 app.UseAuthentication();
 app.UseAuthorization();

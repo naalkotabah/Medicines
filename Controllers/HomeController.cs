@@ -105,7 +105,21 @@ namespace Medicines.Controllers
 
 
 
+        [HttpGet]
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = await context.Users
+                .Select(u => new
+                {
+               u.Name,
+               u.IsDleted,
+               u.RoleId
+                  
+                })
+                .ToListAsync();
 
+            return Ok(users);
+        }
 
         private string GenerateJwtToken(Users user)
         {
