@@ -6,6 +6,7 @@ namespace Medicines.Data.Models
     {
         public int Id { get; set; }
         public string NamePractitioner { get; set; }
+        public string Password { get; set; }
         public string Address { get; set; }
         public string PhonNumber { get; set; }
         public string Studies { get; set; }

@@ -24,6 +24,30 @@ namespace Medicines.Controllers
         }
 
 
+
+        [HttpPost("Login/Practitioner")]
+        public async Task<IActionResult> Login([FromBody] Login_Practitioner  Practitioner)
+        {
+            if (Practitioner == null || string.IsNullOrWhiteSpace(Practitioner.NamePractitioner) || string.IsNullOrWhiteSpace(Practitioner.Password))
+            {
+                return BadRequest(new { message = "Name and password are required" });
+            }
+
+            var dbPractitioners = await _context.Practitioners
+                .FirstOrDefaultAsync(u => u.NamePractitioner == Practitioner.NamePractitioner && u.Password == Practitioner.Password);
+
+            if (dbPractitioners == null)
+            {
+                return Unauthorized(new { message = "Invalid username or password" });
+            }
+
+
+
+
+                return Ok(Practitioner);
+        }
+
+
         [HttpGet]
         public async Task<IActionResult> GetPractitioners()
         {
@@ -125,6 +149,7 @@ namespace Medicines.Controllers
             var practitioner = new Practitioner
             {
                 NamePractitioner = practitionerDto.NamePractitioner,
+                Password = practitionerDto.Password,
                 Address = practitionerDto.Address,
                 PhonNumber = practitionerDto.PhonNumber,
                 Studies = practitionerDto.Studies,
