@@ -12,13 +12,15 @@ namespace Medicines.Middleware
         private readonly RequestDelegate _next;
         private readonly ILogger<ErrorHandlingMiddleware> _logger;
 
-        public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
+        private readonly IWebHostEnvironment _env;
+
+        public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger, IWebHostEnvironment env)
         {
             _next = next;
             _logger = logger;
+            _env = env;
         }
-
-        public async Task InvokeAsync(HttpContext httpContext)
+    public async Task InvokeAsync(HttpContext httpContext)
         {
             try
             {
@@ -34,8 +36,9 @@ namespace Medicines.Middleware
                 var errorResponse = new
                 {
                     message = "حدث خطأ غير متوقع في السيرفر.",
-                    details = ex.Message // ⚠️ يمكنك تعطيل هذا في بيئة الإنتاج
+                    details = _env.IsDevelopment() ? ex.Message : null
                 };
+
 
                 var jsonResponse = JsonSerializer.Serialize(errorResponse);
                 await httpContext.Response.WriteAsync(jsonResponse);

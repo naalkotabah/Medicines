@@ -1,14 +1,6 @@
-﻿using AutoMapper;
-using Medicines.Data;
-using Medicines.Data.Models;
-using Microsoft.AspNetCore.Http;
+﻿using Medicines.Data.dto;
+using Medicines.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using System.Linq;
-using Medicines.Data.dto;
-using Microsoft.AspNetCore.Authorization;
-using Medicines.Services;
 
 namespace Medicines.Controllers
 {
@@ -16,274 +8,58 @@ namespace Medicines.Controllers
     [ApiController]
     public class PharmacicsController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
-        public PharmacicsController(AppDbContext context, IMapper mapper)
+        private readonly IPharmacyService _service;
+
+        public PharmacicsController(IPharmacyService service)
         {
-            _context = context;
-            _mapper = mapper;
+            _service = service;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetPharmacics()
         {
-            var pharmacics = await _context.Pharmacies
-                .Include(p => p.Medicines)
-                .Include(p => p.Practitioner)
-                .Select(p => new
-                {
-                    p.Id,
-                    p.Name,
-                    p.Address,
-                    p.Latitude,
-                    p.ImagePharmacics,
-                    p.Longitude,
-                    p.City,
-                    p.LicenseNumber,
-
-                    Medicines = p.Medicines.Select(m => new
-                    {
-                        m.Id,
-                        m.ScientificName,
-                        m.TradeName,
-                        m.ProducingCompany
-                    }).ToList(),
-
-               
-                    Practitioner = p.Practitioner != null ?new
-                    {
-                        p.Practitioner.Id,
-                        p.Practitioner.NamePractitioner
-                    } : null
-                })
-                .ToListAsync();
-
-            return Ok(pharmacics);
+            var result = await _service.GetAllAsync();
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPharmacics(int id)
         {
-            var pharmacy = await _context.Pharmacies
-                .Include(p => p.Medicines)  // جلب الأدوية المرتبطة بالصيدلية
-                .Include(p => p.Practitioner) // جلب بيانات المتمرس المرتبط بالصيدلية
-                .Where(p => p.Id == id)
-                .Select(p => new
-                {
-                    p.Id,
-                    p.Name,
-                    p.Address,
-                    p.Latitude,
-                    p.Longitude,
-                    p.City,
-                    p.LicenseNumber,
-
-                    Medicines = p.Medicines.Select(m => new
-                    {
-                        m.Id,
-                        m.ScientificName,
-                        m.TradeName,
-                        m.ProducingCompany
-                    }).ToList(),
-
-                    Practitioner = p.Practitioner != null ? new
-                    {
-                        p.Practitioner.Id,
-                        p.Practitioner.NamePractitioner
-                    } : null
-                })
-                .FirstOrDefaultAsync();
-
+            var pharmacy = await _service.GetByIdAsync(id);
             if (pharmacy == null)
                 return NotFound(new { message = "الصيدلية غير موجودة." });
 
-            return Ok(new
-            {
-                message = "تم جلب بيانات الصيدلية بنجاح.",
-                pharmacy
-            });
+            return Ok(new { message = "تم جلب البيانات", pharmacy });
         }
-
-
 
         [HttpPost]
-        [Route("api/pharmacics/add")]
-        public async Task<IActionResult> AddPharmacics([FromForm] PharmacicsDto model)
+        public async Task<IActionResult> AddPharmacy([FromForm] PharmacicsDto model)
         {
-            if (model.ImagePharmacics == null || model.ImagePharmacics.Length == 0)
-                return BadRequest("يجب رفع صورة للصيدلية");
+            var (success, message, data) = await _service.AddAsync(model);
+            if (!success)
+                return BadRequest(new { message });
 
-            
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-            var fileUploadService = new FileUploadService(uploadsFolder);
-
-            string fileName;
-            try
-            {
-                fileName = await fileUploadService.UploadImageAsync(model.ImagePharmacics);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-
-            // التحقق من صحة البيانات
-            if (model == null)
-                return BadRequest(new { message = "البيانات غير صحيحة." });
-
-            var practitioner = await _context.Practitioners.FindAsync(model.PractitionerId);
-            if (practitioner == null)
-                return BadRequest(new { message = "الصيدلاني غير موجود" });
-
-            bool isPractitionerLinkedToPharmacy = await _context.Pharmacies
-                .AnyAsync(p => p.PractitionerId == model.PractitionerId);
-
-            if (isPractitionerLinkedToPharmacy)
-                return BadRequest(new { message = "لا يمكن انشاء أكثر من صيدلية لنفس المتمرس." });
-
-            // تحويل الـ DTO إلى كيان
-            var pharmacy = _mapper.Map<Pharmacics>(model);
-            pharmacy.PractitionerId = model.PractitionerId;
-            pharmacy.ImagePharmacics = fileName; // حفظ اسم الصورة فقط
-
-            try
-            {
-                await _context.Pharmacies.AddAsync(pharmacy);
-                await _context.SaveChangesAsync();
-
-                var savedPharmacy = await _context.Pharmacies
-                    .Include(p => p.Practitioner)
-                    .FirstOrDefaultAsync(p => p.Id == pharmacy.Id);
-
-                return Ok(new
-                {
-                    message = "تمت إضافة الصيدلية بنجاح.",
-                    pharmacy = new
-                    {
-                        savedPharmacy.Id,
-                        savedPharmacy.Name,
-                        savedPharmacy.Address,
-                        savedPharmacy.Latitude,
-                        savedPharmacy.Longitude,
-                        savedPharmacy.City,
-                        savedPharmacy.LicenseNumber,
-                        savedPharmacy.ImagePharmacics,
-                        PractitionerName = savedPharmacy.Practitioner?.NamePractitioner,
-                        savedPharmacy.PractitionerId
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    message = "حدث خطأ أثناء حفظ البيانات.",
-                    error = ex.InnerException?.Message ?? ex.Message
-                });
-            }
+            return Ok(new { message, pharmacy = data });
         }
-
-
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePharmacy(int id, [FromForm] PharmacicsDto model)
         {
-            var pharmacy = await _context.Pharmacies.FindAsync(id);
+            var (success, message, data) = await _service.UpdateAsync(id, model);
+            if (!success)
+                return BadRequest(new { message });
 
-            if (pharmacy == null)
-            {
-                return NotFound(new { message = "لم يتم العثور على الصيدلية." });
-            }
-
-            try
-            {
-                string fileName = pharmacy.ImagePharmacics; // الاحتفاظ بالصورة القديمة
-
-                if (model.ImagePharmacics != null && model.ImagePharmacics.Length > 0)
-                {
-                    // 1️⃣ حذف الصورة القديمة إذا كانت موجودة
-                    if (!string.IsNullOrEmpty(pharmacy.ImagePharmacics))
-                    {
-                        string oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), pharmacy.ImagePharmacics.TrimStart('/'));
-                        if (System.IO.File.Exists(oldFilePath))
-                        {
-                            System.IO.File.Delete(oldFilePath);
-                        }
-                    }
-
-                    // 2️⃣ حفظ الصورة الجديدة
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-                    var fileUploadService = new FileUploadService(uploadsFolder);
-                    fileName = await fileUploadService.UploadImageAsync(model.ImagePharmacics);
-                    fileName = $"/uploads/{fileName}";
-                }
-
-                // 3️⃣ تحديث البيانات مع الصورة الجديدة (إذا كانت مرفوعة)
-                _mapper.Map(model, pharmacy);
-                pharmacy.ImagePharmacics = fileName; // تحديث الصورة الجديدة أو الإبقاء على القديمة
-
-                _context.Pharmacies.Update(pharmacy);
-                await _context.SaveChangesAsync();
-
-                return Ok(new
-                {
-                    message = "تم تحديث بيانات الصيدلية بنجاح.",
-                    pharmacy = new
-                    {
-                        pharmacy.Id,
-                        pharmacy.Name,
-                        pharmacy.Address,
-                        pharmacy.Latitude,
-                        pharmacy.Longitude,
-                        pharmacy.City,
-                        pharmacy.LicenseNumber,
-                        pharmacy.ImagePharmacics // إرجاع رابط الصورة الجديدة أو القديمة
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    message = "حدث خطأ أثناء تحديث البيانات.",
-                    error = ex.InnerException?.Message ?? ex.Message
-                });
-            }
+            return Ok(new { message, pharmacy = data });
         }
 
-
-
-        [HttpDelete]
- 
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePharmacy(int id)
         {
-            var pharmacy = await _context.Pharmacies.FindAsync(id);
+            var (success, message, data) = await _service.DeleteAsync(id);
+            if (!success)
+                return NotFound(new { message });
 
-            if (pharmacy == null)
-            {
-                return NotFound(new { message = "لم يتم العثور على الصيدلية." });
-            }
-
-            _context.Pharmacies.Remove(pharmacy);
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                message = "تم حذف بيانات الصيدلية بنجاح.",
-                pharmacy = new
-                {
-                    pharmacy.Id,
-                    pharmacy.Name,
-                    pharmacy.Address,
-                    pharmacy.Latitude,
-                    pharmacy.Longitude,
-                    pharmacy.City,
-                    pharmacy.LicenseNumber,
-             
-                }
-            });
+            return Ok(new { message, pharmacy = data });
         }
-
-
     }
 }

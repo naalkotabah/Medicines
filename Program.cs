@@ -1,6 +1,10 @@
 ﻿using Medicines.Data;
 using Medicines.Mapping;
 using Medicines.Middleware;
+using Medicines.Repositories.Interfaces;
+using Medicines.Repositories;
+using Medicines.Services.Interfaces;
+using Medicines.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -12,16 +16,34 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ 1️⃣ إعداد الاتصال بقاعدة البيانات
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("myconnection")));
 
-// ✅ 2️⃣ إضافة الخدمات الأساسية
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ✅ 3️⃣ تمكين CORS (السماح بطلبات محددة)
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IMedicineRepository, MedicineRepository>();
+builder.Services.AddScoped<IMedicineService, MedicineService>();
+
+
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddScoped<IPharmacyRepository, PharmacyRepository>();
+builder.Services.AddScoped<IPharmacyService, PharmacyService>();
+
+builder.Services.AddScoped<IPractitionerRepository, PractitionerRepository>();
+builder.Services.AddScoped<IPractitionerService, PractitionerService>();
+
+
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -33,7 +55,7 @@ builder.Services.AddCors(options =>
         });
 });
 
-// ✅ 4️⃣ إعداد المصادقة باستخدام JWT
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -50,7 +72,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// ✅ 5️⃣ إعداد Swagger لدعم المصادقة JWT
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -85,7 +107,7 @@ builder.Services.AddSwaggerGen(options =>
 
 
 
-// ✅ 6️⃣ إعداد سياسات التصريح (Authorization)
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
@@ -94,22 +116,22 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOrUser", policy => policy.RequireRole("Admin", "User"));
 });
 
-// ✅ 7️⃣ إضافة AutoMapper
+
 builder.Services.AddAutoMapper(typeof(Mappings));
 
 var app = builder.Build();
 
-// ✅ 8️⃣ تشغيل Swagger فقط في بيئة التطوير
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// ✅ 9️⃣ استخدام Middleware لمعالجة الأخطاء في جميع البيئات
+
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
-// ✅ 1️⃣0️⃣ تمكين CORS (يجب أن يكون قبل المصادقة والتخويل)
+
 app.UseCors("AllowSpecificOrigin");
 
 app.UseHttpsRedirection();

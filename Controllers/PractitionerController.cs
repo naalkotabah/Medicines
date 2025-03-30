@@ -1,12 +1,6 @@
-﻿using AutoMapper;
-using Medicines.Data;
-using Medicines.Data.dto;
-using Medicines.Data.Models;
-using Medicines.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Medicines.Data.dto;
+using Medicines.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Medicines.Controllers
 {
@@ -14,245 +8,85 @@ namespace Medicines.Controllers
     [ApiController]
     public class PractitionerController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly IPractitionerService _service;
 
-        public PractitionerController(AppDbContext context, IMapper mapper)
+        public PractitionerController(IPractitionerService service)
         {
-            _context = context;
-            _mapper = mapper;
+            _service = service;
         }
-
-
 
         [HttpPost("Login/Practitioner")]
-        public async Task<IActionResult> Login([FromBody] Login_Practitioner  Practitioner)
+        public async Task<IActionResult> Login([FromBody] Login_Practitioner dto)
         {
-            if (Practitioner == null || string.IsNullOrWhiteSpace(Practitioner.NamePractitioner) || string.IsNullOrWhiteSpace(Practitioner.Password))
-            {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.NamePractitioner) || string.IsNullOrWhiteSpace(dto.Password))
                 return BadRequest(new { message = "Name and password are required" });
-            }
 
-            var dbPractitioners = await _context.Practitioners
-                .FirstOrDefaultAsync(u => u.NamePractitioner == Practitioner.NamePractitioner && u.Password == Practitioner.Password);
+            var result = await _service.LoginAsync(dto);
 
-            if (dbPractitioners == null)
-            {
+            if (result == null)
                 return Unauthorized(new { message = "Invalid username or password" });
-            }
 
-
-
-
-                return Ok(Practitioner);
+            return Ok(result);
         }
-
 
         [HttpGet]
         public async Task<IActionResult> GetPractitioners()
         {
-            var practitioners = await _context.Practitioners
-                .Include(p => p.Pharmacy)
-                .Select(p => new
-                {
-                    p.Id,
-                    p.NamePractitioner,
-                    p.Address,
-                    p.PhonNumber,
-                     p.Studies,
-                     p.ImagePractitioner,
-                    Pharmacy = p.Pharmacy != null ? new
-                    {
-                        p.Pharmacy.Id,
-                        p.Pharmacy.Name,
-                        p.Pharmacy.Address
-                    } : null
-                })
-                .ToListAsync();
-
-            return Ok(practitioners);
+            var result = await _service.GetAllAsync();
+            return Ok(result);
         }
 
-        [HttpGet]
-        [Route("GetForselect")]
-        public async Task<IActionResult> GetPractitioners_Forselected()
+        [HttpGet("GetForselect")]
+        public async Task<IActionResult> GetPractitioners_ForSelect()
         {
-            var practitioners = await _context.Practitioners
-                .Include(p => p.Pharmacy)
-                .Select(p => new
-                {
-                    p.Id,
-                    p.NamePractitioner,
-                
-                })
-                .ToListAsync();
-
-            return Ok(practitioners);
+            var result = await _service.GetForSelectAsync();
+            return Ok(result);
         }
 
         [HttpGet("{Practitionersid}")]
-        public async Task<IActionResult> GetMyPharmcic(int Practitionersid)
+        public async Task<IActionResult> GetMyPharmacy(int Practitionersid)
         {
-            var practitioner = await _context.Practitioners
-                .Where(p => p.Id == Practitionersid) // تصفية النتيجة بناءً على Practitionersid
-                .Include(p => p.Pharmacy) // تضمين بيانات الصيدلية المرتبطة
-                .Select(p => new
-                {
-                    Pharmacy = p.Pharmacy != null ? new
-                    {
-                        p.Pharmacy.Id,
-                        p.Pharmacy.Name,
-                        p.Pharmacy.Address,
-                        p.Pharmacy.Latitude,
-                        p.Pharmacy.Longitude,
-                        p.Pharmacy.City,
-                        p.Pharmacy.LicenseNumber
-                    } : null
-                })
-                .FirstOrDefaultAsync(); // جلب أول نتيجة فقط بدلاً من قائمة
+            var result = await _service.GetMyPharmacyAsync(Practitionersid);
+            if (result == null)
+                return NotFound(new { message = "الممارس غير موجود أو لا يملك صيدلية." });
 
-            if (practitioner == null)
-            {
-                return NotFound(new { message = "لم يتم العثور على الممارس أو لا يملك صيدلية." });
-            }
-
-            return Ok(practitioner);
+            return Ok(result);
         }
-
-
 
         [HttpPost]
-        public async Task<IActionResult> AddPractitioner([FromForm] PractitionerCreateDto practitionerDto)
+        public async Task<IActionResult> AddPractitioner([FromForm] PractitionerCreateDto dto)
         {
-            if (practitionerDto == null)
-                return BadRequest("Invalid data");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            if (practitionerDto.ImagePractitioner == null || practitionerDto.ImagePractitioner.Length == 0)
-                return BadRequest("Image is required.");
+            var (success, message, data) = await _service.AddAsync(dto);
 
-            // 1️⃣ إنشاء كائن من `FileUploadService` وتمرير المسار
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-            var fileUploadService = new FileUploadService(uploadsFolder);
+            if (!success)
+                return BadRequest(new { message });
 
-            string fileName;
-            try
-            {
-                // 2️⃣ استدعاء `UploadImageAsync` لحفظ الصورة
-                fileName = await fileUploadService.UploadImageAsync(practitionerDto.ImagePractitioner);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-
-            // 3️⃣ إنشاء الكيان وتخزين اسم الملف فقط
-            var practitioner = new Practitioner
-            {
-                NamePractitioner = practitionerDto.NamePractitioner,
-                Password = practitionerDto.Password,
-                Address = practitionerDto.Address,
-                PhonNumber = practitionerDto.PhonNumber,
-                Studies = practitionerDto.Studies,
-                ImagePractitioner = $"/uploads/{fileName}" // حفظ المسار النسبي
-            };
-
-            try
-            {
-                await _context.Practitioners.AddAsync(practitioner);
-                await _context.SaveChangesAsync();
-
-                return CreatedAtAction(nameof(GetPractitioners), new { id = practitioner.Id }, practitioner);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    message = "حدث خطأ أثناء حفظ البيانات.",
-                    error = ex.InnerException?.Message ?? ex.Message
-                });
-            }
+            return Ok(new { message, practitioner = data });
         }
-
-
-
-
 
         [HttpPut("{id}")]
-
-        public async Task<IActionResult> UpdatePractitioner(int id, [FromForm] PractitionerCreateDto practitionerDto)
+        public async Task<IActionResult> UpdatePractitioner(int id, [FromForm] PractitionerCreateDto dto)
         {
-            var existingPractitioner = await _context.Practitioners.FindAsync(id);
-            if (existingPractitioner == null)
-                return NotFound(new { message = "لم يتم العثور على الطبيب." });
+            var (success, message, data) = await _service.UpdateAsync(id, dto);
 
-            try
-            {
-                string fileName = existingPractitioner.ImagePractitioner; // احتفاظ بالصورة الحالية
+            if (!success)
+                return BadRequest(new { message });
 
-                if (practitionerDto.ImagePractitioner != null && practitionerDto.ImagePractitioner.Length > 0)
-                {
-                    // 1️⃣ حذف الصورة القديمة إذا كانت موجودة
-                    if (!string.IsNullOrEmpty(existingPractitioner.ImagePractitioner))
-                    {
-                        string oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), existingPractitioner.ImagePractitioner.TrimStart('/'));
-                        if (System.IO.File.Exists(oldFilePath))
-                        {
-                            System.IO.File.Delete(oldFilePath);
-                        }
-                    }
-
-                    // 2️⃣ حفظ الصورة الجديدة
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-                    var fileUploadService = new FileUploadService(uploadsFolder);
-                    fileName = await fileUploadService.UploadImageAsync(practitionerDto.ImagePractitioner);
-                    fileName = $"/uploads/{fileName}";
-                }
-
-                // 3️⃣ تحديث البيانات مع الصورة الجديدة (إذا كانت مرفوعة)
-                existingPractitioner.NamePractitioner = practitionerDto.NamePractitioner;
-                existingPractitioner.Address = practitionerDto.Address;
-                existingPractitioner.PhonNumber = practitionerDto.PhonNumber;
-                existingPractitioner.Studies = practitionerDto.Studies;
-                existingPractitioner.ImagePractitioner = fileName; // تحديث المسار الجديد أو الإبقاء على القديم
-
-                await _context.SaveChangesAsync();
-                return Ok(new { message = "تم تحديث بيانات الطبيب بنجاح.", practitioner = existingPractitioner });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    message = "حدث خطأ أثناء تحديث البيانات.",
-                    error = ex.InnerException?.Message ?? ex.Message
-                });
-            }
+            return Ok(new { message, practitioner = data });
         }
-
-
 
         [HttpDelete("{id}")]
-
         public async Task<IActionResult> DeletePractitioner(int id)
         {
-            var practitioner = await _context.Practitioners
-                .Include(p => p.Pharmacy) // جلب الصيدلية المرتبطة بالطبيب
-                .FirstOrDefaultAsync(p => p.Id == id);
+            var (success, message, data) = await _service.DeleteAsync(id);
 
-            if (practitioner == null)
-                return NotFound();
+            if (!success)
+                return BadRequest(new { message });
 
-            // التحقق مما إذا كان الطبيب مرتبطًا بصيدلية
-            if (practitioner.Pharmacy != null && practitioner.Pharmacy.PractitionerId == id)
-            {
-                return BadRequest(new { message = "لا يمكن حذف الطبيب لأنه مرتبط بصيدلية، يرجى حذف الصيدلية أولاً." });
-            }
-
-            _context.Practitioners.Remove(practitioner);
-            await _context.SaveChangesAsync();
-
-            return Ok(practitioner);
+            return Ok(new { message, practitioner = data });
         }
-
-
     }
 }
