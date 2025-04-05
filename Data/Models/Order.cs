@@ -22,14 +22,14 @@ namespace Medicines.Data.Models
 
 
         public int UserId { get; set; }
-        public Users User { get; set; }
+        public Users? User { get; set; }
 
 
         public int PharmacyId { get; set; }
-        public Pharmacics Pharmacy { get; set; }
+        public Pharmacics? Pharmacy { get; set; }
 
         [JsonIgnore]
-        public List<OrderMedicine> OrderMedicines { get; set; }
+        public List<OrderMedicine>? OrderMedicines { get; set; }
 
 
 

@@ -9,6 +9,6 @@
             public string? PhonNumber { get; set; }
             public string? Studies { get; set; }
 
-        public IFormFile ImagePractitioner { get; set; } //صورة لشهادة الصيدلية 
+        public IFormFile? ImagePractitioner { get; set; } //صورة لشهادة الصيدلية 
     }
 }
