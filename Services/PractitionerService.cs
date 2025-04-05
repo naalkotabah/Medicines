@@ -102,7 +102,7 @@
             if (existing == null)
                 return (false, "الممارس غير موجود", null);
 
-            string fileName = existing.ImagePractitioner;
+            string fileName = (existing.ImagePractitioner ?? string.Empty) ;
 
             if (dto.ImagePractitioner != null && dto.ImagePractitioner.Length > 0)
             {

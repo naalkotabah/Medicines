@@ -46,13 +46,14 @@ namespace Medicines.Repositories
         public async Task<List<Order>> GetOrdersWithDetailsAsync()
         {
             return await _context!.Orders!
-        .Include(o => o.User)
-        .Include(o => o.Pharmacy)
-        .Include(o => o.OrderMedicines)
-            .ThenInclude(om => om.Medicine)
-        .ToListAsync();
-
+                .Include(o => o.User)
+                .Include(o => o.Pharmacy)
+                .Include(o => o.OrderMedicines)
+                    .ThenInclude(om => om.Medicine)
+                .ToListAsync();
         }
+
+
 
 
     }

@@ -125,11 +125,15 @@
             if (pharmacy == null)
                 return (false, "الصيدلية غير موجودة", null);
 
-            string fileName = pharmacy.ImagePharmacics;
+            string fileName = pharmacy.ImagePharmacics ?? string.Empty; ;
 
             if (dto.ImagePharmacics != null && dto.ImagePharmacics.Length > 0)
             {
-                string oldPath = Path.Combine(Directory.GetCurrentDirectory(), pharmacy.ImagePharmacics.TrimStart('/'));
+                string oldPath = Path.Combine(
+      Directory.GetCurrentDirectory(),
+      (pharmacy.ImagePharmacics ?? string.Empty).TrimStart('/')
+  );
+
                 if (File.Exists(oldPath)) File.Delete(oldPath);
 
                 var newFile = await _upload.UploadImageAsync(dto.ImagePharmacics);

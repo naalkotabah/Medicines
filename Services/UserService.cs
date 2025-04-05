@@ -48,6 +48,9 @@
 
         public async Task<LoginDto?> LoginAsync(UserDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Password))
+                return null;
+
             var user = await _userRepository.GetUserByCredentialsAsync(dto.Name, dto.Password);
             if (user == null) return null;
 
@@ -60,6 +63,7 @@
                 Token = token
             };
         }
+
 
         public async Task<List<Users>> GetUsersAsync()
         {
