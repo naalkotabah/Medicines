@@ -138,7 +138,9 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(@"C:\Users\Nael\source\repos\Medicines\uploads"),
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")
+    ),
     RequestPath = "/uploads"
 });
 

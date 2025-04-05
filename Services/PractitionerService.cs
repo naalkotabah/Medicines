@@ -16,7 +16,7 @@
         {
             _repo = repo;
             _mapper = mapper;
-            _upload = new FileUploadService(Path.Combine(Directory.GetCurrentDirectory(), "uploads"));
+            _upload = new FileUploadService(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
         }
 
         public async Task<object?> LoginAsync(Login_Practitioner dto)
@@ -102,11 +102,14 @@
             if (existing == null)
                 return (false, "الممارس غير موجود", null);
 
-            string fileName = (existing.ImagePractitioner ?? string.Empty) ;
+            string fileName = (existing.ImagePractitioner ?? string.Empty);
 
             if (dto.ImagePractitioner != null && dto.ImagePractitioner.Length > 0)
             {
-                string oldPath = Path.Combine(Directory.GetCurrentDirectory(), fileName.TrimStart('/'));
+                // نحصل فقط على اسم الملف بدون /uploads
+                string imageNameOnly = Path.GetFileName(fileName);
+                string oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", imageNameOnly);
+
                 if (File.Exists(oldPath)) File.Delete(oldPath);
 
                 fileName = $"/uploads/{await _upload.UploadImageAsync(dto.ImagePractitioner)}";
@@ -121,6 +124,7 @@
             await _repo.UpdateAsync(existing);
             return (true, "تم التحديث", existing);
         }
+
 
         public async Task<(bool, string, object?)> DeleteAsync(int id)
         {

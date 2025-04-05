@@ -17,7 +17,7 @@
             _repo = repo;
             _mapper = mapper;
 
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
             _upload = new FileUploadService(uploadsFolder);
         }
 
@@ -90,7 +90,10 @@
             {
                 if (!string.IsNullOrEmpty(medicine.ImageMedicine))
                 {
-                    string oldPath = Path.Combine(Directory.GetCurrentDirectory(), medicine.ImageMedicine.TrimStart('/'));
+                    // استخراج اسم الملف من المسار
+                    string imageNameOnly = Path.GetFileName(medicine.ImageMedicine);
+                    string oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", imageNameOnly);
+
                     if (File.Exists(oldPath)) File.Delete(oldPath);
                 }
 
@@ -114,5 +117,4 @@
             return (true, "تم الحذف", medicine);
         }
     }
-
 }
