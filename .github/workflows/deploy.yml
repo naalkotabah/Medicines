@@ -3,7 +3,7 @@
 on:
   push:
     branches:
-      - master
+      - master  # لأن فرعك اسمه master
 
 jobs:
   deploy:
@@ -16,7 +16,7 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '6.0.x' # أو 7 أو 8 حسب نسخة مشروعك
+          dotnet-version: '6.0.x'
 
       - name: Restore dependencies
         run: dotnet restore
@@ -27,7 +27,10 @@ jobs:
       - name: Publish project
         run: dotnet publish -c Release -o out
 
+      - name: Install Railway CLI
+        run: npm install -g railway
+
       - name: Deploy to Railway
-        uses: railwayapp/cli-action@v1
-        with:
-          railwayToken: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --service=اسم-الخدمة
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
