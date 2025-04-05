@@ -31,7 +31,7 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        run: railway up
+        run: railway up --service=Medicines
         env:
          RAILWAY_TOKEN: ${{ secrets.Nael }}
 
