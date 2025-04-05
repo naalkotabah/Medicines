@@ -6,23 +6,23 @@ namespace Medicines.Data.Models
     {
         public int Id { get; set; } // مفتاح أساسي
 
-        public string TradeName { get; set; } = string.Empty; // الاسم التجاري للدواء
+        public string? TradeName { get; set; } 
 
-        public string ScientificName { get; set; } = string.Empty; // الاسم العلمي
+        public string? ScientificName { get; set; } 
 
-        public string ImageMedicine { get; set; } = string.Empty; // صورة الدواء
+        public string? ImageMedicine { get; set; }
 
         public decimal Dosage { get; set; } // الجرعة
 
-        public string DrugTiming { get; set; } = string.Empty; // توقيت الدواء
+        public string? DrugTiming { get; set; } 
 
-        public string SideEffects { get; set; } = string.Empty; // الآثار الجانبية
+        public string? SideEffects { get; set; } 
 
-        public string ContraindicatedDrugs { get; set; } = string.Empty; // الأدوية الممنوعة مع هذا الدواء
+        public string? ContraindicatedDrugs { get; set; } 
 
-        public string ManufacturerName { get; set; } = string.Empty; // اسم المصنع
+        public string? ManufacturerName { get; set; } 
 
-        public string ProducingCompany { get; set; } = string.Empty; // اسم الشركة المنتجة
+        public string? ProducingCompany { get; set; }
         public DateTime? ExpiryDate { get; set; }
 
         public decimal Price { get; set; }

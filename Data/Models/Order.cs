@@ -10,15 +10,15 @@ namespace Medicines.Data.Models
 
         public float Weight { get; set; } //الوزن
 
-        public string ChronicDiseases { get; set; } //الأمراض المزمنة
+        public string? ChronicDiseases { get; set; } //الأمراض المزمنة
 
 
         public DateTime OrderDate { get; set; }
 
 
-        public string DrugAllergy { get; set; } // حساسية  الادوية 
+        public string? DrugAllergy { get; set; } // حساسية  الادوية 
 
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
 
         public int UserId { get; set; }

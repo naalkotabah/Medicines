@@ -4,7 +4,7 @@
     {
      
             public int Id { get; set; }
-            public string Name { get; set; } // مثال: "Admin", "User", "Manager"
+            public string? Name { get; set; } // مثال: "Admin", "User", "Manager"
 
             public ICollection<Users> Users { get; set; } = new List<Users>();
         
