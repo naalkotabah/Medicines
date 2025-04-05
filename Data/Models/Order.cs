@@ -13,7 +13,9 @@ namespace Medicines.Data.Models
         public string ChronicDiseases { get; set; } //الأمراض المزمنة
 
 
-        public DateTime dateTime { get; set; }
+        public DateTime OrderDate { get; set; }
+
+
         public string DrugAllergy { get; set; } // حساسية  الادوية 
 
         public string Address { get; set; }

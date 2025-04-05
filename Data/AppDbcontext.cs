@@ -95,7 +95,7 @@ namespace Medicines.Data
             modelBuilder.Entity<Order>(entity =>
             {
                 entity.HasKey(o => o.Id);
-                entity.Property(o => o.dateTime).HasColumnType("datetime2(7)");
+             
                 entity.Property(o => o.FinalPrice).HasPrecision(10, 2);
 
                 // العلاقة بين `Order` و `User`

@@ -36,7 +36,7 @@
                 UserId = dto.UserId,
                 PharmacyId = dto.PharmacyId,
                 FinalPrice = finalPrice,
-                dateTime = DateTime.Now,
+                OrderDate = DateTime.Now,
                 OrderMedicines = medicines.Select(m => new OrderMedicine
                 {
                     MedicineId = m.Id
@@ -56,7 +56,7 @@
                 order.ChronicDiseases,
                 order.DrugAllergy,
                 order.Address,
-                order.dateTime,
+                order.OrderDate,
                 order.FinalPrice,
                 UserName = userName,
                 PharmacyName = pharmacyName,
