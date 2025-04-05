@@ -16,23 +16,23 @@ namespace Medicines.Repositories
 
         public async Task<bool> IsUsernameTaken(string username)
         {
-            return await _context.Users.AnyAsync(u => u.Name == username);
+            return await _context.Users!.AnyAsync(u => u.Name == username);
         }
 
         public async Task AddUserAsync(Users user)
         {
-            _context.Users.Add(user);
+            _context.Users!.Add(user);
             await _context.SaveChangesAsync();
         }
 
         public async Task<Users?> GetUserByCredentialsAsync(string name, string password)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Name == name && u.Password == password && !u.IsDleted);
+            return await _context.Users!.FirstOrDefaultAsync(u => u.Name == name && u.Password == password && !u.IsDleted);
         }
 
         public async Task<List<Users>> GetAllUsersAsync()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users!.ToListAsync();
         }
     }
 
