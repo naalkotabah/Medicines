@@ -29,7 +29,8 @@ namespace Medicines.Data.Models
         public Pharmacics? Pharmacy { get; set; }
 
         [JsonIgnore]
-        public List<OrderMedicine>? OrderMedicines { get; set; }
+        public List<OrderMedicine> OrderMedicines { get; set; } = new();
+
 
 
 

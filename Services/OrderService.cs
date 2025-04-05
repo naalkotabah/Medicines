@@ -70,18 +70,24 @@
         {
             var orders = await _repo.GetOrdersWithDetailsAsync();
 
-            return orders.Select(o => new
-            {
-                OrderId = o.Id,
-                CustomerName = o.User.Name,
-                PharmacyName = o.Pharmacy.Name,
-                FinalPrice = o.FinalPrice,
-                Medicines = o.OrderMedicines.Select(om => new
+            return orders
+                .Where(o => o.User != null && o.Pharmacy != null && o.OrderMedicines != null)
+                .Select(o => new
                 {
-                    MedicineName = om.Medicine.TradeName
-                }).ToList()
-            }).ToList<object>();
+                    OrderId = o.Id,
+                    CustomerName = o.User!.Name, // بعد التحقق نقدر نحط !
+                    PharmacyName = o.Pharmacy!.Name,
+                    FinalPrice = o.FinalPrice,
+                    Medicines = o.OrderMedicines!
+                        .Where(om => om.Medicine != null)
+                        .Select(om => new
+                        {
+                            MedicineName = om.Medicine!.TradeName
+                        }).ToList()
+                })
+                .ToList<object>();
         }
+
     }
 
 }
