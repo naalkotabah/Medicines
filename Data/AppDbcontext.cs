@@ -12,13 +12,13 @@ namespace Medicines.Data
         {
         }
 
-        public DbSet<Users> Users { get; set; }
-        public DbSet<Pharmacics> Pharmacies { get; set; }
-        public DbSet<Medicine> Medicines { get; set; }
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderMedicine> OrderMedicines { get; set; }
-        public DbSet<Roles> Roles { get; set; }
-        public DbSet<Practitioner> Practitioners { get; set; }
+        public DbSet<Users>? Users { get; set; }
+        public DbSet<Pharmacics>? Pharmacies { get; set; }
+        public DbSet<Medicine>? Medicines { get; set; }
+        public DbSet<Order>? Orders { get; set; }
+        public DbSet<OrderMedicine>? OrderMedicines { get; set; }
+        public DbSet<Roles>? Roles { get; set; }
+        public DbSet<Practitioner>? Practitioners { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // 🔹 تعريف جدول `Users`

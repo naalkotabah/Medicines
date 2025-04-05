@@ -73,13 +73,13 @@
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Name)
-        };
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Name, user.Name ?? string.Empty) // تعديل هنا
+    };
 
-            if (user.Role != null)
-                claims.Add(new Claim(ClaimTypes.Role, user.Role.Name));
+            if (!string.IsNullOrEmpty(user.Role?.Name))
+                claims.Add(new Claim(ClaimTypes.Role, user.Role.Name!));
 
             var token = new JwtSecurityToken(
                 issuer: jwtConfig["Issuer"],
@@ -91,6 +91,8 @@
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+
     }
 
 }
