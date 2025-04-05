@@ -21,9 +21,14 @@
 
         public async Task<object?> LoginAsync(Login_Practitioner dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.NamePractitioner) || string.IsNullOrWhiteSpace(dto.Password))
+                return null;
+
             var user = await _repo.GetByLoginAsync(dto.NamePractitioner, dto.Password);
             return user != null ? dto : null;
         }
+
+
 
         public async Task<List<object>> GetAllAsync()
         {

@@ -39,9 +39,9 @@
                 m.Price,
                 Pharmacy = new
                 {
-                    m.Pharmacy.Id,
-                    m.Pharmacy.Name,
-                    m.Pharmacy.Address
+                    m.Pharmacy?.Id,
+                    m.Pharmacy?.Name,
+                    m.Pharmacy?.Address
                 }
             });
         }

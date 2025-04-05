@@ -32,7 +32,7 @@
                 p.City,
                 p.LicenseNumber,
                 p.ImagePharmacics,
-                Medicines = p.Medicines.Select(m => new
+                Medicines = p.Medicines?.Select(m => new
                 {
                     m.Id,
                     m.ScientificName,
@@ -62,7 +62,7 @@
                 pharmacy.City,
                 pharmacy.LicenseNumber,
                 pharmacy.ImagePharmacics,
-                Medicines = pharmacy.Medicines.Select(m => new
+                Medicines = pharmacy.Medicines?.Select(m => new
                 {
                     m.Id,
                     m.ScientificName,
