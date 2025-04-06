@@ -37,7 +37,7 @@
 
             var newUser = new Users
             {
-                Name = dto.Name,
+                Name = dto.Name +" "+ dto.LastName,
                 Password = dto.Password,
                 RoleId = 1,
                 IsDleted = false
