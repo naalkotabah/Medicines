@@ -29,6 +29,9 @@
             if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Password))
                 return (false, "Name and password are required", null);
 
+            if (dto.Name == "string" || dto.Password == "string")
+                return (false, "Name and password are required", null);
+
             if (await _userRepository.IsUsernameTaken(dto.Name))
                 return (false, "This username is already taken", null);
 
@@ -49,6 +52,10 @@
         public async Task<LoginDto?> LoginAsync(UserDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Password))
+                return null;
+
+
+            if (dto.Name == "string" || dto.Password == "string")
                 return null;
 
             var user = await _userRepository.GetUserByCredentialsAsync(dto.Name, dto.Password);
