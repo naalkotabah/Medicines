@@ -26,10 +26,10 @@
 
         public async Task<(bool Success, string Message, string? Token)> RegisterAsync(RegisterDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Password))
+            if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Password) || string.IsNullOrWhiteSpace(dto.UserName))
                 return (false, "Name and password are required", null);
 
-            if (dto.Name == "string" || dto.Password == "string")
+            if (dto.Name == "string" || dto.Password == "string" || dto.UserName == "string"  )
                 return (false, "Name and password are required", null);
 
             if (await _userRepository.IsUsernameTaken(dto.Name))
@@ -37,7 +37,9 @@
 
             var newUser = new Users
             {
-                Name = dto.Name +" "+ dto.LastName,
+                Name = dto.Name,
+                LastName = dto.LastName,
+                UserName = dto.UserName,
                 Password = dto.Password,
                 RoleId = 1,
                 IsDleted = false
@@ -51,14 +53,14 @@
 
         public async Task<LoginDto?> LoginAsync(UserDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Password))
+            if (string.IsNullOrWhiteSpace(dto.UserName) || string.IsNullOrWhiteSpace(dto.Password))
                 return null;
 
 
-            if (dto.Name == "string" || dto.Password == "string")
+            if (dto.UserName == "string" || dto.Password == "string" )
                 return null;
 
-            var user = await _userRepository.GetUserByCredentialsAsync(dto.Name, dto.Password);
+            var user = await _userRepository.GetUserByCredentialsAsync(dto.UserName, dto.Password);
             if (user == null) return null;
 
             var token = GenerateJwtToken(user);

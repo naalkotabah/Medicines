@@ -42,7 +42,7 @@ namespace Medicines.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] UserDto userDto)
         {
-            if (userDto == null || string.IsNullOrWhiteSpace(userDto.Name) || string.IsNullOrWhiteSpace(userDto.Password))
+            if (userDto == null || string.IsNullOrWhiteSpace(userDto.UserName) || string.IsNullOrWhiteSpace(userDto.Password))
                 return BadRequest(new { message = "Name and password are required" });
 
             var result = await _userService.LoginAsync(userDto);

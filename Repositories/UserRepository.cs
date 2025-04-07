@@ -27,7 +27,7 @@ namespace Medicines.Repositories
 
         public async Task<Users?> GetUserByCredentialsAsync(string name, string password)
         {
-            return await _context.Users!.FirstOrDefaultAsync(u => u.Name == name && u.Password == password && !u.IsDleted);
+            return await _context.Users!.FirstOrDefaultAsync(u => u.UserName == name && u.Password == password && !u.IsDleted);
         }
 
         public async Task<List<Users>> GetAllUsersAsync()

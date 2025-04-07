@@ -1,5 +1,6 @@
 ﻿using Medicines.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System.Collections.Concurrent;
 using System.Data;
 
@@ -25,14 +26,33 @@ namespace Medicines.Data
             modelBuilder.Entity<Users>(entity =>
             {
                 entity.HasKey(u => u.Id);
-                entity.Property(u => u.Name).IsRequired().HasMaxLength(100);
-                entity.Property(u => u.Password).IsRequired().HasMaxLength(10);
+
+                entity.Property(u => u.Name)
+                      .IsRequired()
+                      .HasMaxLength(100);
+
+                entity.Property(u => u.LastName)
+                
+                      .HasMaxLength(50);
+
+                entity.Property(u => u.UserName)
+                     
+                      .HasMaxLength(50);
+
+                entity.Property(u => u.Password)
+                      .IsRequired()
+                      .HasMaxLength(10);
+
+                // 🔐 يمنع إدخال رموز غير الحروف والأرقام في كلمة المرور
+                entity.HasCheckConstraint("CK_User_Password_ValidChars", "\"Password\" !~ '[^a-zA-Z0-9]'");
+
 
                 entity.HasOne(u => u.Role)
                       .WithMany(r => r.Users)
                       .HasForeignKey(u => u.RoleId)
-                      .OnDelete(DeleteBehavior.Restrict); // لمنع حذف الأدوار المرتبطة بمستخدمين
+                      .OnDelete(DeleteBehavior.Restrict); // يمنع حذف الدور إذا كان مرتبطًا بمستخدم
             });
+
 
             modelBuilder.Entity<Roles>(entity =>
             {
@@ -136,7 +156,7 @@ namespace Medicines.Data
 
 
             modelBuilder.Entity<Users>().HasData(
-                new Users { Id = 1, Name = "Admin", Password = "12345", IsDleted = false, RoleId = 2 }
+                new Users { Id = 1, Name = "Admin", Password = "12345", UserName= "Admin", LastName = "Admin", IsDleted = false, RoleId = 2 }
 
 
             );
