@@ -19,28 +19,28 @@ namespace Medicines.Services
             }
         }
 
-        public async Task<string> UploadImageAsync(IFormFile imageFile)
+        public async Task<(bool Success, string Message, string? FileName)> UploadImageAsync(IFormFile imageFile)
         {
             if (imageFile == null || imageFile.Length == 0)
-                throw new ArgumentException("يجب رفع صورة.");
+                return (false, "يجب رفع ملف.", null);
 
-            var allowedExtension = ".png";
+            var allowedExtensions = new[] { ".png", ".jpg", ".jpeg", ".pdf" };
             var fileExtension = Path.GetExtension(imageFile.FileName).ToLower();
 
-            if (fileExtension != allowedExtension)
-                throw new ArgumentException("يُسمح فقط بملفات PNG.");
+            if (!allowedExtensions.Contains(fileExtension))
+                return (false, "امتداد الملف غير مسموح. يُسمح فقط بـ PNG, JPG, JPEG, PDF.", null);
 
-         
             var fileName = $"{Guid.NewGuid()}{fileExtension}";
             var filePath = Path.Combine(_uploadsFolder, fileName);
 
-            // حفظ الصورة في المجلد
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await imageFile.CopyToAsync(stream);
             }
 
-            return fileName; // إرجاع اسم الملف المحفوظ
+            return (true, "تم رفع الملف بنجاح", fileName);
         }
+
+
     }
 }

@@ -89,21 +89,14 @@
             if (await _repo.IsPractitionerLinkedAsync(dto.PractitionerId))
                 return (false, "هذا المتمرس مرتبط بصيدلية بالفعل", null);
 
-            string fileName;
-            try
-            {
-                fileName = await _upload.UploadImageAsync(dto.ImagePharmacics);
-            }
-            catch (Exception ex)
-            {
-                return (false, ex.Message, null);
-            }
+            var uploadResult = await _upload.UploadImageAsync(dto.ImagePharmacics);
+            if (!uploadResult.Success)
+                return (false, uploadResult.Message, null);
 
             var pharmacy = _mapper.Map<Pharmacics>(dto);
-            pharmacy.ImagePharmacics = $"/uploads/{fileName}";
+            pharmacy.ImagePharmacics = $"/uploads/{uploadResult.FileName}";
 
             await _repo.AddAsync(pharmacy);
-           
 
             return (true, "تمت الإضافة بنجاح", new
             {
@@ -119,25 +112,31 @@
             });
         }
 
+
         public async Task<(bool, string, object?)> UpdateAsync(int id, PharmacicsDto dto)
         {
             var pharmacy = await _repo.GetByIdAsync(id);
             if (pharmacy == null)
                 return (false, "الصيدلية غير موجودة", null);
 
-            string fileName = pharmacy.ImagePharmacics ?? string.Empty; ;
+            string fileName = pharmacy.ImagePharmacics ?? string.Empty;
 
             if (dto.ImagePharmacics != null && dto.ImagePharmacics.Length > 0)
             {
+                var uploadResult = await _upload.UploadImageAsync(dto.ImagePharmacics);
+                if (!uploadResult.Success)
+                    return (false, uploadResult.Message, null);
+
+                // حذف الصورة القديمة
                 string oldPath = Path.Combine(
-      Directory.GetCurrentDirectory(),
-      (pharmacy.ImagePharmacics ?? string.Empty).TrimStart('/')
-  );
+                    Directory.GetCurrentDirectory(),
+                    (pharmacy.ImagePharmacics ?? string.Empty).TrimStart('/')
+                );
 
-                if (File.Exists(oldPath)) File.Delete(oldPath);
+                if (File.Exists(oldPath))
+                    File.Delete(oldPath);
 
-                var newFile = await _upload.UploadImageAsync(dto.ImagePharmacics);
-                fileName = $"/uploads/{newFile}";
+                fileName = $"/uploads/{uploadResult.FileName}";
             }
 
             _mapper.Map(dto, pharmacy);
@@ -147,6 +146,7 @@
 
             return (true, "تم التحديث بنجاح", pharmacy);
         }
+    
 
         public async Task<(bool, string, object?)> DeleteAsync(int id)
         {

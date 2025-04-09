@@ -80,7 +80,10 @@
             if (dto.ImagePractitioner == null || dto.ImagePractitioner.Length == 0)
                 return (false, "الصورة مطلوبة", null);
 
-            string fileName = await _upload.UploadImageAsync(dto.ImagePractitioner);
+            var uploadResult = await _upload.UploadImageAsync(dto.ImagePractitioner);
+
+            if (!uploadResult.Success)
+                return (false, uploadResult.Message, null);
 
             var practitioner = new Practitioner
             {
@@ -89,12 +92,13 @@
                 Address = dto.Address,
                 PhonNumber = dto.PhonNumber,
                 Studies = dto.Studies,
-                ImagePractitioner = $"/uploads/{fileName}"
+                ImagePractitioner = $"/uploads/{uploadResult.FileName}"
             };
 
             await _repo.AddAsync(practitioner);
             return (true, "تمت الإضافة بنجاح", practitioner);
         }
+
 
         public async Task<(bool, string, object?)> UpdateAsync(int id, PractitionerCreateDto dto)
         {
@@ -102,17 +106,24 @@
             if (existing == null)
                 return (false, "الممارس غير موجود", null);
 
-            string fileName = (existing.ImagePractitioner ?? string.Empty);
+            string fileName = existing.ImagePractitioner ?? string.Empty;
 
             if (dto.ImagePractitioner != null && dto.ImagePractitioner.Length > 0)
             {
-                // نحصل فقط على اسم الملف بدون /uploads
+                // ارفع الصورة الجديدة
+                var uploadResult = await _upload.UploadImageAsync(dto.ImagePractitioner);
+
+                if (!uploadResult.Success)
+                    return (false, uploadResult.Message, null);
+
+                // حذف الصورة القديمة إن وُجدت
                 string imageNameOnly = Path.GetFileName(fileName);
                 string oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", imageNameOnly);
 
-                if (File.Exists(oldPath)) File.Delete(oldPath);
+                if (File.Exists(oldPath))
+                    File.Delete(oldPath);
 
-                fileName = $"/uploads/{await _upload.UploadImageAsync(dto.ImagePractitioner)}";
+                fileName = $"/uploads/{uploadResult.FileName}";
             }
 
             existing.NamePractitioner = dto.NamePractitioner;

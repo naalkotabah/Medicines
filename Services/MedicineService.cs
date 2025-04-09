@@ -55,23 +55,18 @@
             if (dto.ImageMedicine == null || dto.ImageMedicine.Length == 0)
                 return (false, "يجب تحميل صورة الدواء", null);
 
-            string fileName;
-            try
-            {
-                fileName = await _upload.UploadImageAsync(dto.ImageMedicine);
-            }
-            catch (Exception ex)
-            {
-                return (false, ex.Message, null);
-            }
+            var uploadResult = await _upload.UploadImageAsync(dto.ImageMedicine);
+            if (!uploadResult.Success)
+                return (false, uploadResult.Message, null);
 
             var medicine = _mapper.Map<Medicine>(dto);
-            medicine.ImageMedicine = $"/uploads/{fileName}";
+            medicine.ImageMedicine = $"/uploads/{uploadResult.FileName}";
 
             await _repo.AddAsync(medicine);
 
             return (true, "تمت الإضافة بنجاح", medicine);
         }
+
 
         public async Task<(bool, string, object?)> UpdateAsync(int id, medicineDto dto)
         {
@@ -88,17 +83,21 @@
 
             if (dto.ImageMedicine != null && dto.ImageMedicine.Length > 0)
             {
+                var uploadResult = await _upload.UploadImageAsync(dto.ImageMedicine);
+                if (!uploadResult.Success)
+                    return (false, uploadResult.Message, null);
+
+                // حذف الصورة القديمة إن وجدت
                 if (!string.IsNullOrEmpty(medicine.ImageMedicine))
                 {
-                    // استخراج اسم الملف من المسار
                     string imageNameOnly = Path.GetFileName(medicine.ImageMedicine);
                     string oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", imageNameOnly);
 
-                    if (File.Exists(oldPath)) File.Delete(oldPath);
+                    if (File.Exists(oldPath))
+                        File.Delete(oldPath);
                 }
 
-                var newFile = await _upload.UploadImageAsync(dto.ImageMedicine);
-                medicine.ImageMedicine = $"/uploads/{newFile}";
+                medicine.ImageMedicine = $"/uploads/{uploadResult.FileName}";
             }
 
             _mapper.Map(dto, medicine);
@@ -106,6 +105,7 @@
 
             return (true, "تم التحديث بنجاح", medicine);
         }
+
 
         public async Task<(bool, string, object?)> DeleteAsync(int id)
         {

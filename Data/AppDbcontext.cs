@@ -22,7 +22,7 @@ namespace Medicines.Data
         public DbSet<Practitioner>? Practitioners { get; set; } = default!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // 🔹 تعريف جدول `Users`
+           
             modelBuilder.Entity<Users>(entity =>
             {
                 entity.HasKey(u => u.Id);
@@ -43,7 +43,7 @@ namespace Medicines.Data
                       .IsRequired()
                       .HasMaxLength(10);
 
-                // 🔐 يمنع إدخال رموز غير الحروف والأرقام في كلمة المرور
+              
                 entity.HasCheckConstraint("CK_User_Password_ValidChars", "\"Password\" !~ '[^a-zA-Z0-9]'");
 
 
@@ -60,7 +60,7 @@ namespace Medicines.Data
                 entity.Property(r => r.Name).IsRequired().HasMaxLength(50);
             });
 
-            // 🔹 تعريف جدول `Practitioner`
+        
             modelBuilder.Entity<Practitioner>(entity =>
             {
                 entity.HasKey(p => p.Id);
@@ -81,12 +81,12 @@ namespace Medicines.Data
                 entity.Property(p => p.LicenseNumber).IsRequired().HasMaxLength(50);
 
 
-                // 🔹 تعريف العلاقة One-to-One
+        
                 entity.HasOne(p => p.Practitioner)
                       .WithOne(pr => pr.Pharmacy)
                       .HasForeignKey<Pharmacics>(p => p.PractitionerId)
                       .IsRequired()
-                      .OnDelete(DeleteBehavior.Restrict); // منع حذف الطبيب عند حذف الصيدلية
+                      .OnDelete(DeleteBehavior.Restrict); 
 
                 entity.HasMany(p => p.Medicines)
                       .WithOne(m => m.Pharmacy)
@@ -94,7 +94,7 @@ namespace Medicines.Data
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // 🔹 تعريف جدول `Medicines`
+        
             modelBuilder.Entity<Medicine>(entity =>
             {
                 entity.HasKey(m => m.Id);
@@ -111,27 +111,27 @@ namespace Medicines.Data
                 entity.Property(m => m.PharmacyId).IsRequired();
             });
 
-            // 🔹 تعريف جدول `Orders`
+        
             modelBuilder.Entity<Order>(entity =>
             {
                 entity.HasKey(o => o.Id);
              
                 entity.Property(o => o.FinalPrice).HasPrecision(10, 2);
 
-                // العلاقة بين `Order` و `User`
+         
                 entity.HasOne(o => o.User)
                     .WithMany(u => u.Orders)
                     .HasForeignKey(o => o.UserId)
-                    .OnDelete(DeleteBehavior.Restrict); // ✅ تجنب `Multiple Cascade Paths`
+                    .OnDelete(DeleteBehavior.Restrict); 
 
-                // العلاقة بين `Order` و `Pharmacy`
+         
                 entity.HasOne(o => o.Pharmacy)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(o => o.PharmacyId)
-                    .OnDelete(DeleteBehavior.Restrict); // ✅ تجنب `Multiple Cascade Paths`
+                    .OnDelete(DeleteBehavior.Restrict); 
             });
 
-            // 🔹 تعريف العلاقة `Many-to-Many` بين `Order` و `Medicine`
+     
             modelBuilder.Entity<OrderMedicine>()
                 .HasKey(om => new { om.OrderId, om.MedicineId });
 
@@ -139,13 +139,13 @@ namespace Medicines.Data
                 .HasOne(om => om.Order)
                 .WithMany(o => o.OrderMedicines)
                 .HasForeignKey(om => om.OrderId)
-                .OnDelete(DeleteBehavior.Restrict); // ✅ تجنب `Multiple Cascade Paths`
+                .OnDelete(DeleteBehavior.Restrict); 
 
             modelBuilder.Entity<OrderMedicine>()
                 .HasOne(om => om.Medicine)
                 .WithMany(m => m.OrderMedicines)
                 .HasForeignKey(om => om.MedicineId)
-                .OnDelete(DeleteBehavior.Restrict); // ✅ تجنب `Multiple Cascade Paths`
+                .OnDelete(DeleteBehavior.Restrict); 
 
 
             modelBuilder.Entity<Roles>().HasData(
