@@ -15,19 +15,19 @@ namespace Medicines.Controllers
             _service = service;
         }
 
-        [HttpPost("Login/Practitioner")]
-        public async Task<IActionResult> Login([FromBody] Login_Practitioner dto)
-        {
-            if (dto == null || string.IsNullOrWhiteSpace(dto.NamePractitioner) || string.IsNullOrWhiteSpace(dto.Password))
-                return BadRequest(new { message = "Name and password are required" });
+        //[HttpPost("Login/Practitioner")]
+        //public async Task<IActionResult> Login([FromBody] Login_Practitioner dto)
+        //{
+        //    if (dto == null || string.IsNullOrWhiteSpace(dto.NamePractitioner) || string.IsNullOrWhiteSpace(dto.Password))
+        //        return BadRequest(new { message = "Name and password are required" });
 
-            var result = await _service.LoginAsync(dto);
+        //    var result = await _service.LoginAsync(dto);
 
-            if (result == null)
-                return Unauthorized(new { message = "Invalid username or password" });
+        //    if (result == null)
+        //        return Unauthorized(new { message = "Invalid username or password" });
 
-            return Ok(result);
-        }
+        //    return Ok(result);
+        //}
 
         [HttpGet]
         public async Task<IActionResult> GetPractitioners()
