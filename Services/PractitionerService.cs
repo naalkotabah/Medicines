@@ -1,21 +1,25 @@
 ﻿namespace Medicines.Services
 {
     using AutoMapper;
+    using Medicines.Data;
     using Medicines.Data.dto;
     using Medicines.Data.Models;
     using Medicines.Repositories.Interfaces;
     using Medicines.Services.Interfaces;
+    using Microsoft.EntityFrameworkCore;
 
     public class PractitionerService : IPractitionerService
     {
         private readonly IPractitionerRepository _repo;
+        private readonly AppDbContext _context;
         private readonly IMapper _mapper;
         private readonly FileUploadService _upload;
 
-        public PractitionerService(IPractitionerRepository repo, IMapper mapper)
+        public PractitionerService(IPractitionerRepository repo, IMapper mapper , AppDbContext context)
         {
             _repo = repo;
             _mapper = mapper;
+            _context = context;
             _upload = new FileUploadService(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"));
         }
 
@@ -81,23 +85,51 @@
                 return (false, "الصورة مطلوبة", null);
 
             var uploadResult = await _upload.UploadImageAsync(dto.ImagePractitioner);
-
             if (!uploadResult.Success)
                 return (false, uploadResult.Message, null);
 
+            // 1. أنشئ المستخدم أولاً
+            var user = new Users
+            {
+                Name = dto.UserName,
+                UserName = dto.UserName,
+                Password = dto.Password,
+                RoleId = 3,
+                IsDleted = false
+            };
+
+            await _context.Users!.AddAsync(user);
+            await _context.SaveChangesAsync(); // ✅ مهم: لحفظ الـ Id
+
+            // 2. أنشئ الصيدلاني بعد توليد User.Id
             var practitioner = new Practitioner
             {
-                NamePractitioner = dto.NamePractitioner,
+                NamePractitioner = dto.UserName,
                 Password = dto.Password,
                 Address = dto.Address,
                 PhonNumber = dto.PhonNumber,
                 Studies = dto.Studies,
-                ImagePractitioner = $"/uploads/{uploadResult.FileName}"
+                ImagePractitioner = $"/uploads/{uploadResult.FileName}",
+                UserId = user.Id // ✅ الربط هنا
+            };
+            var response = new PractitionerDto
+            {
+               
+                NamePractitioner = practitioner.NamePractitioner,
+                Address = practitioner.Address,
+                PhonNumber = practitioner.PhonNumber,
+                Studies = practitioner.Studies,
+                ImagePractitioner = practitioner.ImagePractitioner
             };
 
-            await _repo.AddAsync(practitioner);
-            return (true, "تمت الإضافة بنجاح", practitioner);
+          
+
+            await _context.Practitioners!.AddAsync(practitioner);
+            await _context.SaveChangesAsync();
+
+            return (true, "تمت الإضافة بنجاح", response);
         }
+
 
 
         public async Task<(bool, string, object?)> UpdateAsync(int id, PractitionerCreateDto dto)
@@ -126,7 +158,7 @@
                 fileName = $"/uploads/{uploadResult.FileName}";
             }
 
-            existing.NamePractitioner = dto.NamePractitioner;
+            existing.NamePractitioner = dto.UserName;
             existing.Address = dto.Address;
             existing.PhonNumber = dto.PhonNumber;
             existing.Studies = dto.Studies;

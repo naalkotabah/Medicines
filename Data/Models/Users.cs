@@ -22,6 +22,8 @@ namespace Medicines.Data.Models
 
         public ICollection<Order>? Orders { get; set; } = new List<Order>();
 
+        public Practitioner? Practitioner { get; set; }
+
     }
 
 }

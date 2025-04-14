@@ -50,7 +50,14 @@ namespace Medicines.Data
                 entity.HasOne(u => u.Role)
                       .WithMany(r => r.Users)
                       .HasForeignKey(u => u.RoleId)
-                      .OnDelete(DeleteBehavior.Restrict); // يمنع حذف الدور إذا كان مرتبطًا بمستخدم
+                      .OnDelete(DeleteBehavior.Restrict);
+
+
+
+                modelBuilder.Entity<Users>()
+           .HasOne(u => u.Practitioner)
+           .WithOne(p => p.User)
+           .HasForeignKey<Practitioner>(p => p.UserId);
             });
 
 

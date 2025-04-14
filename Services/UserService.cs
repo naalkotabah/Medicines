@@ -56,22 +56,39 @@
             if (string.IsNullOrWhiteSpace(dto.UserName) || string.IsNullOrWhiteSpace(dto.Password))
                 return null;
 
-
-            if (dto.UserName == "string" || dto.Password == "string" )
+            var user = await _userRepository.GetUserWithPractitionerAsync(dto.UserName, dto.Password);
+            if (user == null)
                 return null;
-
-            var user = await _userRepository.GetUserByCredentialsAsync(dto.UserName, dto.Password);
-            if (user == null) return null;
 
             var token = GenerateJwtToken(user);
 
-            return new LoginDto
+            var loginDto = new LoginDto
             {
                 UserId = user.Id,
-                UserName = user.Name,
+                RoleId = user.RoleId,
                 Token = token
             };
+
+            if (user.RoleId == 3 && user.Practitioner != null)
+            {
+                loginDto.PractitionerId = user.Practitioner.Id;
+                loginDto.PractitionerName = user.Practitioner.NamePractitioner;
+
+                if (user.Practitioner.Pharmacy != null)
+                {
+                    loginDto.Pharmacy = new
+                    {
+                        user.Practitioner.Pharmacy.Id,
+                        user.Practitioner.Pharmacy.Name,
+                        user.Practitioner.Pharmacy.Address,
+                        
+                    };
+                }
+            }
+
+            return loginDto;
         }
+
 
 
         public async Task<List<Users>> GetUsersAsync()

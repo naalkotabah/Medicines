@@ -16,6 +16,10 @@ namespace Medicines.Data.Models
 
         // 🔹 علاقة One-to-One إلزامية
         public Pharmacics? Pharmacy { get; set; }
+
+
+        public int UserId { get; set; }
+        public Users? User { get; set; }
     }
 
 }
