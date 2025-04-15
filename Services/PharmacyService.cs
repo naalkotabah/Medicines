@@ -31,6 +31,8 @@
                 p.Longitude,
                 p.City,
                 p.LicenseNumber,
+                p.OpenTime,
+                p.CloseTime,
                 p.ImagePharmacics,
                 Medicines = p.Medicines?.Select(m => new
                 {
@@ -60,6 +62,8 @@
                 pharmacy.Latitude,
                 pharmacy.Longitude,
                 pharmacy.City,
+                pharmacy.OpenTime,
+                pharmacy.CloseTime,
                 pharmacy.LicenseNumber,
                 pharmacy.ImagePharmacics,
                 Medicines = pharmacy.Medicines?.Select(m => new
@@ -108,6 +112,8 @@
                 pharmacy.City,
                 pharmacy.LicenseNumber,
                 pharmacy.ImagePharmacics,
+                pharmacy.OpenTime,
+                pharmacy.CloseTime,
                 pharmacy.PractitionerId
             });
         }

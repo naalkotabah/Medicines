@@ -1,4 +1,7 @@
-﻿namespace Medicines.Data.dto
+﻿using Medicines.Helper;
+using System.Text.Json.Serialization;
+
+namespace Medicines.Data.dto
 {
     public class PharmacicsDto
     {
@@ -9,6 +12,13 @@
         public decimal Latitude { get; set; } // الإحداثيات الجغرافية
 
         public decimal Longitude { get; set; }
+
+     
+        public string? OpenTime { get; set; }
+
+
+        public string? CloseTime { get; set; }
+
 
         public string? City { get; set; } = string.Empty; // المدينة
         public IFormFile? ImagePharmacics { get; set; }

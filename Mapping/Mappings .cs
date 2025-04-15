@@ -13,11 +13,15 @@
 
             CreateMap<Users, LoginDto>();
 
-            CreateMap<Pharmacics, PharmacicsDto>();
-            CreateMap<PharmacicsDto, Pharmacics>(); // ✅ تحويل DTO إلى كيان
+            CreateMap<PharmacicsDto, Pharmacics>()
+      .ForMember(dest => dest.OpenTime,
+          opt => opt.MapFrom(src => TimeSpan.Parse(src.OpenTime)))
+      .ForMember(dest => dest.CloseTime,
+          opt => opt.MapFrom(src => TimeSpan.Parse(src.CloseTime)));
 
 
-         
+
+
             CreateMap<medicineDto, Medicine>()
                 .ForMember(dest => dest.ImageMedicine, opt => opt.Ignore()); 
 

@@ -20,7 +20,8 @@ namespace Medicines.Data.Models
         public bool IsActive { get; set; }
         public string? LicenseNumber { get; set; } = string.Empty; // رقم الترخيص
 
-       
+        public TimeSpan OpenTime { get; set; }
+        public TimeSpan  CloseTime { get; set; }
 
         // 🔹 علاقة الصيدلية مع الأدوية (صيدلية تحتوي على عدة أدوية)
         public List<Medicine>? Medicines { get; set; }
