@@ -1,5 +1,6 @@
 ﻿using Medicines.Data.dto;
 using Medicines.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Medicines.Controllers
@@ -30,6 +31,7 @@ namespace Medicines.Controllers
         //}
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPractitioners()
         {
             var result = await _service.GetAllAsync();
@@ -37,6 +39,7 @@ namespace Medicines.Controllers
         }
 
         [HttpGet("GetForselect")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPractitioners_ForSelect()
         {
             var result = await _service.GetForSelectAsync();
@@ -44,6 +47,7 @@ namespace Medicines.Controllers
         }
 
         [HttpGet("{Practitionersid}")]
+        [Authorize(Roles = "Admin,Practitioner")]
         public async Task<IActionResult> GetMyPharmacy(int Practitionersid)
         {
             var result = await _service.GetMyPharmacyAsync(Practitionersid);
@@ -68,6 +72,7 @@ namespace Medicines.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Practitioner")]
         public async Task<IActionResult> UpdatePractitioner(int id, [FromForm] PractitionerCreateDto dto)
         {
             var (success, message, data) = await _service.UpdateAsync(id, dto);
@@ -79,6 +84,7 @@ namespace Medicines.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Practitioner")]
         public async Task<IActionResult> DeletePractitioner(int id)
         {
             var (success, message, data) = await _service.DeleteAsync(id);

@@ -3,6 +3,7 @@ using Medicines.Data;
 using Medicines.Data.dto;
 using Medicines.Data.Models;
 using Medicines.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +55,8 @@ namespace Medicines.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> GetUsers()
         {
             var users = await _userService.GetUsersAsync();

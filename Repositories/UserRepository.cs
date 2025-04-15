@@ -33,10 +33,12 @@ namespace Medicines.Repositories
         public async Task<Users?> GetUserWithPractitionerAsync(string name, string password)
         {
             return await _context.Users!
-                .Include(u => u.Practitioner)
-                .ThenInclude(p => p.Pharmacy)
+                .Include(u => u.Role)                        // ✅ يجلب الدور من قاعدة البيانات
+                .Include(u => u.Practitioner)                // ✅ يجلب بيانات الصيدلاني
+                    .ThenInclude(p => p.Pharmacy)            // ✅ يجلب الصيدلية التابعة له إن وجدت
                 .FirstOrDefaultAsync(u => u.UserName == name && u.Password == password && !u.IsDleted);
         }
+
 
 
         public async Task<List<Users>> GetAllUsersAsync()

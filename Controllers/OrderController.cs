@@ -1,5 +1,6 @@
 ﻿using Medicines.Data.dto;
 using Medicines.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Medicines.Controllers
@@ -16,6 +17,7 @@ namespace Medicines.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Practitioner,User")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDto orderDto)
         {
             var (success, message, data) = await _orderService.CreateOrderAsync(orderDto);
@@ -27,6 +29,7 @@ namespace Medicines.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Practitioner,User")]
         public async Task<IActionResult> GetOrders()
         {
             var orders = await _orderService.GetAllOrdersAsync();

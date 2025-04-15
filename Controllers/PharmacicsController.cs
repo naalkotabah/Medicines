@@ -1,5 +1,6 @@
 ﻿using Medicines.Data.dto;
 using Medicines.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Medicines.Controllers
@@ -16,6 +17,8 @@ namespace Medicines.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> GetPharmacics()
         {
             var result = await _service.GetAllAsync();
@@ -23,6 +26,7 @@ namespace Medicines.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,Practitioner")]
         public async Task<IActionResult> GetPharmacics(int id)
         {
             var pharmacy = await _service.GetByIdAsync(id);
@@ -33,6 +37,7 @@ namespace Medicines.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Practitioner")]
         public async Task<IActionResult> AddPharmacy([FromForm] PharmacicsDto model)
         {
             var (success, message, data) = await _service.AddAsync(model);
@@ -43,6 +48,7 @@ namespace Medicines.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Practitioner")]
         public async Task<IActionResult> UpdatePharmacy(int id, [FromForm] PharmacicsDto model)
         {
             var (success, message, data) = await _service.UpdateAsync(id, model);
@@ -53,6 +59,7 @@ namespace Medicines.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Practitioner")]
         public async Task<IActionResult> DeletePharmacy(int id)
         {
             var (success, message, data) = await _service.DeleteAsync(id);

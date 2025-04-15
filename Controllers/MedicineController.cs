@@ -1,5 +1,6 @@
 ﻿using Medicines.Data.dto;
 using Medicines.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Medicines.Controllers
@@ -16,6 +17,7 @@ namespace Medicines.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetMedicine()
         {
             var result = await _medicineService.GetAllAsync();
@@ -23,6 +25,7 @@ namespace Medicines.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Practitioner")]
         public async Task<IActionResult> AddMedicine([FromForm] medicineDto medicineDto)
         {
             if (!ModelState.IsValid)
@@ -42,6 +45,7 @@ namespace Medicines.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Practitioner")]
         public async Task<IActionResult> UpdateMedicine(int id, [FromForm] medicineDto medicineDto)
         {
             if (!ModelState.IsValid)
@@ -61,6 +65,7 @@ namespace Medicines.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Practitioner")]
         public async Task<IActionResult> DeleteMedicine(int id)
         {
             var (success, message, data) = await _medicineService.DeleteAsync(id);
