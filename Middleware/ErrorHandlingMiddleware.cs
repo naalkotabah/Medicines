@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Medicines.Middleware
 {
@@ -11,7 +12,6 @@ namespace Medicines.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ErrorHandlingMiddleware> _logger;
-
         private readonly IWebHostEnvironment _env;
 
         public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger, IWebHostEnvironment env)
@@ -20,7 +20,8 @@ namespace Medicines.Middleware
             _logger = logger;
             _env = env;
         }
-    public async Task InvokeAsync(HttpContext httpContext)
+
+        public async Task InvokeAsync(HttpContext httpContext)
         {
             try
             {
@@ -28,17 +29,19 @@ namespace Medicines.Middleware
             }
             catch (Exception ex)
             {
-                _logger.LogError($"❌ خطأ: {ex.Message}");
+                _logger.LogError(ex, "❌ حدث استثناء غير متوقع");
 
                 httpContext.Response.ContentType = "application/json";
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
+                // ✅ عرض التفاصيل بشكل دائم (مؤقتًا لحين انتهاء التصحيح)
                 var errorResponse = new
                 {
                     message = "حدث خطأ غير متوقع في السيرفر.",
-                    details = _env.IsDevelopment() ? ex.Message : null
+                    exception = ex.Message,
+                    stackTrace = ex.StackTrace,
+                    type = ex.GetType().Name
                 };
-
 
                 var jsonResponse = JsonSerializer.Serialize(errorResponse);
                 await httpContext.Response.WriteAsync(jsonResponse);
