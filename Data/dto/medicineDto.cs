@@ -1,4 +1,6 @@
-﻿namespace Medicines.Data.dto
+﻿using System;
+
+namespace Medicines.Data.dto
 {
     public class medicineDto
     {
@@ -11,7 +13,8 @@
         public string? SideEffects { get; set; }
         public string? ContraindicatedDrugs { get; set; }
         public string? ManufacturerName { get; set; }
-    
+
+        public DateTime? ExpiryDate { get; set; }
         public string? ProducingCompany { get; set; }
         public decimal Price { get; set; }
         public int PharmacyId { get; set; }
