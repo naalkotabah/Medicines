@@ -1,7 +1,5 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;
@@ -13,38 +11,50 @@ namespace Medicines.Middleware
         private readonly RequestDelegate _next;
         private readonly ILogger<ErrorHandlingMiddleware> _logger;
         private readonly IWebHostEnvironment _env;
+        private readonly string _logFilePath;
 
         public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger, IWebHostEnvironment env)
         {
             _next = next;
             _logger = logger;
             _env = env;
+
+            // ✅ مسار ملف السجل
+            var logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
+            Directory.CreateDirectory(logDirectory); // إنشاء المجلد إذا لم يكن موجودًا
+            _logFilePath = Path.Combine(logDirectory, "log.txt");
         }
 
-        public async Task InvokeAsync(HttpContext httpContext)
+        public async Task InvokeAsync(HttpContext context)
         {
             try
             {
-                await _next(httpContext); // تمرير الطلب إلى الميدل وير التالي
+                await _next(context);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ حدث استثناء غير متوقع");
+                // ✅ تسجيل في Console + ملف
+                _logger.LogError(ex, "❌ خطأ غير متوقع");
 
-                httpContext.Response.ContentType = "application/json";
-                httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                await File.AppendAllTextAsync(_logFilePath, $@"
+==================== [{DateTime.UtcNow}] ====================
+رسالة الخطأ: {ex.Message}
+النوع: {ex.GetType().Name}
+المسار: {context.Request.Path}
+StackTrace: {ex.StackTrace}
+============================================================
+");
 
-                // ✅ عرض التفاصيل بشكل دائم (مؤقتًا لحين انتهاء التصحيح)
-                var errorResponse = new
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+                var response = new
                 {
-                    message = "حدث خطأ غير متوقع في السيرفر.",
-                    exception = ex.Message,
-                    stackTrace = ex.StackTrace,
-                    type = ex.GetType().Name
+                    message = "حدث خطأ أثناء تنفيذ الطلب، يرجى المحاولة لاحقًا."
                 };
 
-                var jsonResponse = JsonSerializer.Serialize(errorResponse);
-                await httpContext.Response.WriteAsync(jsonResponse);
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
             }
         }
     }

@@ -48,18 +48,29 @@
 
         public async Task<(bool, string, object?)> AddAsync(medicineDto dto)
         {
+            // ✅ التحقق من الصيدلية
             var pharmacy = await _repo.GetPharmacyByIdAsync(dto.PharmacyId);
             if (pharmacy == null)
                 return (false, "لم يتم العثور على الصيدلية", null);
 
+            // ✅ التحقق من وجود صورة
             if (dto.ImageMedicine == null || dto.ImageMedicine.Length == 0)
-                return (false, "يجب تحميل صورة الدواء", null);
+                return (false, "يجب تحميل صورة للدواء", null);
 
+            // ✅ التحقق من السعر
+            if (dto.Price <= 0)
+                return (false, "السعر غير صالح", null);
+
+            // ✅ التحقق من الجرعة
+            if (dto.Dosage <= 0)
+                return (false, "الجرعة غير صالحة", null);
+
+            // ✅ رفع الصورة
             var uploadResult = await _upload.UploadImageAsync(dto.ImageMedicine);
             if (!uploadResult.Success)
                 return (false, uploadResult.Message, null);
 
-            // ✅ تحويل التاريخ بشكل آمن
+            // ✅ تحويل التاريخ
             DateTime? expiryDate = null;
             var expiryRaw = dto.ExpiryDate ?? "";
             if (!string.IsNullOrWhiteSpace(expiryRaw))
@@ -67,19 +78,35 @@
                 if (!DateTime.TryParse(expiryRaw, out var parsedDate))
                     return (false, "صيغة التاريخ غير صحيحة، استخدم yyyy-MM-dd", null);
 
-                expiryDate = parsedDate;
+                // ✅ اجعل التاريخ بصيغة UTC
+                expiryDate = DateTime.SpecifyKind(parsedDate, DateTimeKind.Utc);
             }
 
 
-            // ✅ الآن نعمل Map بعد تجهيز التاريخ
+            // ✅ تكوين كائن الدواء
             var medicine = _mapper.Map<Medicine>(dto);
             medicine.ImageMedicine = $"/uploads/{uploadResult.FileName}";
             medicine.ExpiryDate = expiryDate;
 
-            await _repo.AddAsync(medicine);
+            // ✅ محاولة الحفظ مع تتبع الأخطاء
+            try
+            {
+                await _repo.AddAsync(medicine);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("🛑 فشل في الحفظ:");
+                Console.WriteLine($"رسالة الخطأ: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                Console.WriteLine($"TradeName: {dto.TradeName}, Price: {dto.Price}, Dosage: {dto.Dosage}, PharmacyId: {dto.PharmacyId}");
+
+                return (false, "فشل في حفظ الدواء. تحقق من البيانات المدخلة.", null);
+            }
+
 
             return (true, "تمت الإضافة بنجاح", medicine);
         }
+
 
 
 
