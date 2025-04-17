@@ -15,9 +15,10 @@
 
             CreateMap<PharmacicsDto, Pharmacics>()
       .ForMember(dest => dest.OpenTime,
-          opt => opt.MapFrom(src => TimeSpan.Parse(src.OpenTime)))
+          opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.OpenTime) ? TimeSpan.Zero : TimeSpan.Parse(src.OpenTime)))
       .ForMember(dest => dest.CloseTime,
-          opt => opt.MapFrom(src => TimeSpan.Parse(src.CloseTime)));
+          opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.CloseTime) ? TimeSpan.Zero : TimeSpan.Parse(src.CloseTime)));
+
 
 
 

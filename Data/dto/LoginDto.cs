@@ -4,7 +4,7 @@
     {
         public int UserId { get; set; }
         public int RoleId { get; set; }
-        public string Token { get; set; }
+        public string? Token { get; set; }
 
         // اختياري للصيدلاني
         public int? PractitionerId { get; set; }
