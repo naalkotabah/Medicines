@@ -61,13 +61,15 @@
 
             // ✅ تحويل التاريخ بشكل آمن
             DateTime? expiryDate = null;
-            if (!string.IsNullOrWhiteSpace(dto.ExpiryDate))
+            var expiryRaw = dto.ExpiryDate ?? "";
+            if (!string.IsNullOrWhiteSpace(expiryRaw))
             {
-                if (!DateTime.TryParse(dto.ExpiryDate, out var parsedDate))
+                if (!DateTime.TryParse(expiryRaw, out var parsedDate))
                     return (false, "صيغة التاريخ غير صحيحة، استخدم yyyy-MM-dd", null);
 
                 expiryDate = parsedDate;
             }
+
 
             // ✅ الآن نعمل Map بعد تجهيز التاريخ
             var medicine = _mapper.Map<Medicine>(dto);
