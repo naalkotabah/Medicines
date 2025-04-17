@@ -59,13 +59,26 @@
             if (!uploadResult.Success)
                 return (false, uploadResult.Message, null);
 
+            // ✅ تحويل التاريخ بشكل آمن
+            DateTime? expiryDate = null;
+            if (!string.IsNullOrWhiteSpace(dto.ExpiryDate))
+            {
+                if (!DateTime.TryParse(dto.ExpiryDate, out var parsedDate))
+                    return (false, "صيغة التاريخ غير صحيحة، استخدم yyyy-MM-dd", null);
+
+                expiryDate = parsedDate;
+            }
+
+            // ✅ الآن نعمل Map بعد تجهيز التاريخ
             var medicine = _mapper.Map<Medicine>(dto);
             medicine.ImageMedicine = $"/uploads/{uploadResult.FileName}";
+            medicine.ExpiryDate = expiryDate;
 
             await _repo.AddAsync(medicine);
 
             return (true, "تمت الإضافة بنجاح", medicine);
         }
+
 
 
         public async Task<(bool, string, object?)> UpdateAsync(int id, medicineDto dto)
