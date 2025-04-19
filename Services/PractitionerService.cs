@@ -63,21 +63,60 @@
         public async Task<object?> GetMyPharmacyAsync(int id)
         {
             var practitioner = await _repo.GetPharmacyByPractitionerIdAsync(id);
+
             if (practitioner == null || practitioner.Pharmacy == null)
                 return null;
 
-            var p = practitioner.Pharmacy;
+            var medicinesList = new List<object>();
+
+            if (practitioner.Pharmacy.Medicines != null)
+            {
+                medicinesList = practitioner.Pharmacy.Medicines.Select(m => new
+                {
+                    m.Id,
+                    m.TradeName,
+                    m.ManufacturerName,
+                    m.SideEffects,
+                    m.DrugTiming,
+                    m.ContraindicatedDrugs,
+                    m.ScientificName,
+                    m.Dosage,
+                    m.ImageMedicine,
+                    m.Price,
+                    m.ProducingCompany
+                }).Cast<object>().ToList(); // Cast to object to match List<object>
+            }
+
             return new
             {
-                p.Id,
-                p.Name,
-                p.Address,
-                p.Latitude,
-                p.Longitude,
-                p.City,
-                p.LicenseNumber
+                Practitioner = new
+                {
+                    practitioner.Id,
+                    practitioner.NamePractitioner,
+                    practitioner.Address,
+                    practitioner.PhonNumber,
+                    practitioner.Studies,
+                    practitioner.ImagePractitioner
+                },
+                Pharmacy = new
+                {
+                    practitioner.Pharmacy.Id,
+                    practitioner.Pharmacy.Name,
+                    practitioner.Pharmacy.Address,
+                    practitioner.Pharmacy.Latitude,
+                    practitioner.Pharmacy.Longitude,
+                    practitioner.Pharmacy.City,
+                    practitioner.Pharmacy.LicenseNumber,
+                    practitioner.Pharmacy.ImagePharmacics,
+                    practitioner.Pharmacy.OpenTime,
+                    practitioner.Pharmacy.CloseTime,
+                    Medicines = medicinesList
+                }
             };
         }
+
+
+
 
         public async Task<(bool, string, object?)> AddAsync(PractitionerCreateDto dto)
         {

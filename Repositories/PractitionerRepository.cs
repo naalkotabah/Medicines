@@ -34,8 +34,10 @@ namespace Medicines.Repositories
         {
             return await _context.Practitioners!
                 .Include(p => p.Pharmacy)
+                    .ThenInclude(ph => ph.Medicines) // <-- هذا المطلوب
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
+
 
         public async Task<Practitioner?> GetByIdAsync(int id)
         {
