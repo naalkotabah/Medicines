@@ -7,6 +7,7 @@
     using Medicines.Repositories.Interfaces;
     using Medicines.Services.Interfaces;
     using Microsoft.EntityFrameworkCore;
+    using NuGet.Protocol.Core.Types;
 
     public class PractitionerService : IPractitionerService
     {
@@ -219,6 +220,21 @@
 
             await _repo.DeleteAsync(practitioner);
             return (true, "تم الحذف", practitioner);
+        }
+
+        public async Task<List<SearchMedicinesDto>> SearchMedicinesForPractitioner(int practitionerId, string search)
+        {
+            var medicines = await _repo.SearchMedicinesForPractitioner(practitionerId, search);
+
+              
+
+            return medicines.Select(m => new SearchMedicinesDto
+            {
+                id = m.Id,
+                TradeName = m.TradeName ?? "لا توجد نتائج",
+                ScientificName = m.ScientificName ?? "لا توجد نتائج",
+                Price = m.Price
+            }).ToList();
         }
     }
 }

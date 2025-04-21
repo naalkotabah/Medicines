@@ -5,6 +5,8 @@ namespace Medicines.Repositories.Interfaces
     public interface IPractitionerRepository
     {
         Task<Practitioner?> GetByLoginAsync(string name, string password);
+        Task<List<Medicine>> SearchMedicinesForPractitioner(int practitionerId, string search);
+
         Task<List<Practitioner>> GetAllWithPharmacyAsync();
         Task<List<Practitioner>> GetForSelectAsync();
         Task<Practitioner?> GetPharmacyByPractitionerIdAsync(int id);

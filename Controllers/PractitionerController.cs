@@ -1,4 +1,5 @@
 ﻿using Medicines.Data.dto;
+using Medicines.Services;
 using Medicines.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -93,6 +94,23 @@ namespace Medicines.Controllers
                 return BadRequest(new { message });
 
             return Ok(new { message, practitioner = data });
+        }
+
+
+
+        [HttpGet("search")]
+        [Authorize(Roles = "Admin,Practitioner")]
+        public async Task<IActionResult> SearchMedicines(int practitionerId, string search)
+        {
+            if (string.IsNullOrWhiteSpace(search))
+                return BadRequest("كلمة البحث مطلوبة");
+
+            var result = await _service.SearchMedicinesForPractitioner(practitionerId, search);
+
+            if (result == null || !result.Any())
+                return NotFound("لم يتم العثور على نتائج");
+
+            return Ok(result);
         }
     }
 }

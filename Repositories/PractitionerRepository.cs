@@ -66,6 +66,21 @@ namespace Medicines.Repositories
             _context.Practitioners!.Remove(practitioner);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Medicine>> SearchMedicinesForPractitioner(int practitionerId, string search)
+        {
+            return await _context.Medicines!
+                .Where(m =>
+                    m.Pharmacy != null && // اذا لم يساوي null
+                    m.Pharmacy.PractitionerId == practitionerId &&
+                    (
+                        m.TradeName!.Contains(search) ||
+                        m.ScientificName!.Contains(search)
+                    )
+                )
+                .ToListAsync();
+        }
+
     }
 
 }
