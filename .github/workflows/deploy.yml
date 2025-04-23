@@ -3,7 +3,7 @@
 on:
   push:
     branches:
-      - master  # أو main حسب اسم الفرع عندك
+      - master  
 
 jobs:
   deploy:
@@ -16,7 +16,7 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '6.0.x'  # غيّره لو مشروعك يستخدم .NET 7 أو 8
+          dotnet-version: '6.0.x'  
 
       - name: Restore dependencies
         run: dotnet restore

@@ -7,6 +7,7 @@
 
         public string? TradeName { get; set; }
 
+        public string? Producingcompany {  get; set; }
         public decimal Price { get; set; }
     }
 }

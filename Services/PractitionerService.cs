@@ -231,8 +231,10 @@
             return medicines.Select(m => new SearchMedicinesDto
             {
                 id = m.Id,
-                TradeName = m.TradeName ?? "لا توجد نتائج",
+               
                 ScientificName = m.ScientificName ?? "لا توجد نتائج",
+                Producingcompany= m.ProducingCompany ?? "لا توجد نتائج",
+
                 Price = m.Price
             }).ToList();
         }
