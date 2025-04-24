@@ -41,36 +41,43 @@
                 {
                     m.Pharmacy?.Id,
                     m.Pharmacy?.Name,
-                    m.Pharmacy?.Address
+                    m.Pharmacy?.Address,
+                    m.Pharmacy?.ImagePharmacics,
+                    m.Pharmacy?.CloseTime,
+                    m.Pharmacy?.OpenTime,
+                    m.Pharmacy?.Latitude,
+                    m.Pharmacy?.Longitude,
+             
+
                 }
             });
         }
 
         public async Task<(bool, string, object?)> AddAsync(medicineDto dto)
         {
-            // ✅ التحقق من الصيدلية
+           
             var pharmacy = await _repo.GetPharmacyByIdAsync(dto.PharmacyId);
             if (pharmacy == null)
                 return (false, "لم يتم العثور على الصيدلية", null);
 
-            // ✅ التحقق من وجود صورة
+            
             if (dto.ImageMedicine == null || dto.ImageMedicine.Length == 0)
                 return (false, "يجب تحميل صورة للدواء", null);
 
-            // ✅ التحقق من السعر
+            
             if (dto.Price <= 0)
                 return (false, "السعر غير صالح", null);
 
-            // ✅ التحقق من الجرعة
+           
             if (dto.Dosage <= 0)
                 return (false, "الجرعة غير صالحة", null);
 
-            // ✅ رفع الصورة
+         
             var uploadResult = await _upload.UploadImageAsync(dto.ImageMedicine);
             if (!uploadResult.Success)
                 return (false, uploadResult.Message, null);
 
-            // ✅ تحويل التاريخ
+           
             DateTime? expiryDate = null;
             var expiryRaw = dto.ExpiryDate ?? "";
             if (!string.IsNullOrWhiteSpace(expiryRaw))

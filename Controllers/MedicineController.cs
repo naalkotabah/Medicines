@@ -17,7 +17,7 @@ namespace Medicines.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> GetMedicine()
         {
             var result = await _medicineService.GetAllAsync();
