@@ -4,7 +4,7 @@
 
     public interface IMedicineService
     {
-        Task<object> GetAllAsync();
+        Task<object> GetAllAsync(int pageNumber, int pageSize);
         Task<(bool Success, string Message, object? Data)> AddAsync(medicineDto dto);
         Task<(bool Success, string Message, object? Data)> UpdateAsync(int id, medicineDto dto);
         Task<(bool Success, string Message, object? Data)> DeleteAsync(int id);

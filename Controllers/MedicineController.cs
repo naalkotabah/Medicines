@@ -2,6 +2,7 @@
 using Medicines.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Drawing.Printing;
 
 namespace Medicines.Controllers
 {
@@ -18,9 +19,9 @@ namespace Medicines.Controllers
 
         [HttpGet]
 
-        public async Task<IActionResult> GetMedicine()
+        public async Task<IActionResult> GetMedicine(int pageNumber = 1, int pageSize = 10)
         {
-            var result = await _medicineService.GetAllAsync();
+            var result = await _medicineService.GetAllAsync( pageNumber , pageSize);
             return Ok(result);
         }
 

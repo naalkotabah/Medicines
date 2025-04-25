@@ -21,37 +21,55 @@
             _upload = new FileUploadService(uploadsFolder);
         }
 
-        public async Task<object> GetAllAsync()
+        public async Task<object> GetAllAsync(int pageNumber = 1, int pageSize = 10)
         {
-            var meds = await _repo.GetAllAsync();
-            return meds.Select(m => new
-            {
-                m.Id,
-                m.TradeName,
-                m.ScientificName,
-                m.ImageMedicine,
-                m.Dosage,
-                m.DrugTiming,
-                m.SideEffects,
-                m.ContraindicatedDrugs,
-                m.ManufacturerName,
-                m.ProducingCompany,
-                m.Price,
-                Pharmacy = new
-                {
-                    m.Pharmacy?.Id,
-                    m.Pharmacy?.Name,
-                    m.Pharmacy?.Address,
-                    m.Pharmacy?.ImagePharmacics,
-                    m.Pharmacy?.CloseTime,
-                    m.Pharmacy?.OpenTime,
-                    m.Pharmacy?.Latitude,
-                    m.Pharmacy?.Longitude,
-             
+           
+            var skip = (pageNumber - 1) * pageSize;
 
-                }
-            });
+       
+            var meds = await _repo.GetAllAsync();
+
+            var pagedMeds = meds.Skip(skip).Take(pageSize);
+
+
+            var totalItems = meds.Count();
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+        
+            return new
+            {
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                Data = pagedMeds.Select(m => new
+                {
+                    m.Id,
+                    m.TradeName,
+                    m.ScientificName,
+                    m.ImageMedicine,
+                    m.Dosage,
+                    m.DrugTiming,
+                    m.SideEffects,
+                    m.ContraindicatedDrugs,
+                    m.ManufacturerName,
+                    m.ProducingCompany,
+                    m.Price,
+                    Pharmacy = new
+                    {
+                        m.Pharmacy?.Id,
+                        m.Pharmacy?.Name,
+                        m.Pharmacy?.Address,
+                        m.Pharmacy?.ImagePharmacics,
+                        m.Pharmacy?.CloseTime,
+                        m.Pharmacy?.OpenTime,
+                        m.Pharmacy?.Latitude,
+                        m.Pharmacy?.Longitude,
+                    }
+                })
+            };
         }
+
 
         public async Task<(bool, string, object?)> AddAsync(medicineDto dto)
         {
