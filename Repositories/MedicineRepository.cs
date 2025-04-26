@@ -48,6 +48,15 @@ namespace Medicines.Repositories
         {
             return await _context.Pharmacies!.FirstOrDefaultAsync(p => p.Id == id);
         }
+
+        public async Task<List<Medicine>> SerchForMedicineHome(string name)
+        {
+            return await _context.Medicines!
+                .Where(m=> m.TradeName!.Contains(name) 
+                 || m.ScientificName!.Contains(name))
+                .ToListAsync();
+
+        }
     }
 
 }

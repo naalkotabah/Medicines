@@ -9,6 +9,8 @@ namespace Medicines.Repositories.Interfaces
         Task AddAsync(Medicine medicine);
         Task UpdateAsync(Medicine medicine);
         Task DeleteAsync(Medicine medicine);
+
+        Task<List<Medicine>> SerchForMedicineHome(string name);
         Task<Pharmacics?> GetPharmacyByIdAsync(int id);
     }
 

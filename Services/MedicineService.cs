@@ -5,6 +5,7 @@
     using Medicines.Data.Models;
     using Medicines.Repositories.Interfaces;
     using Medicines.Services.Interfaces;
+    using System.Collections.Generic;
 
     public class MedicineService : IMedicineService
     {
@@ -21,7 +22,7 @@
             _upload = new FileUploadService(uploadsFolder);
         }
 
-        public async Task<object> GetAllAsync(int pageNumber = 1, int pageSize = 10)
+        public async Task<object> GetAllAsync(int pageNumber = 1, int pageSize = 10 ,int Pharmacice=0)
         {
            
             var skip = (pageNumber - 1) * pageSize;
@@ -35,39 +36,69 @@
             var totalItems = meds.Count();
             var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
-        
-            return new
+
+            if(Pharmacice != 0)
             {
-                TotalItems = totalItems,
-                TotalPages = totalPages,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                Data = pagedMeds.Select(m => new
+                return new
                 {
-                    m.Id,
-                    m.TradeName,
-                    m.ScientificName,
-                    m.ImageMedicine,
-                    m.Dosage,
-                    m.DrugTiming,
-                    m.SideEffects,
-                    m.ContraindicatedDrugs,
-                    m.ManufacturerName,
-                    m.ProducingCompany,
-                    m.Price,
-                    Pharmacy = new
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Data = pagedMeds.Select(m => new
                     {
-                        m.Pharmacy?.Id,
-                        m.Pharmacy?.Name,
-                        m.Pharmacy?.Address,
-                        m.Pharmacy?.ImagePharmacics,
-                        m.Pharmacy?.CloseTime,
-                        m.Pharmacy?.OpenTime,
-                        m.Pharmacy?.Latitude,
-                        m.Pharmacy?.Longitude,
-                    }
-                })
-            };
+                
+                        Pharmacy = new
+                        {
+                            m.Pharmacy?.Id,
+                            m.Pharmacy?.Name,
+                            m.Pharmacy?.Address,
+                            m.Pharmacy?.ImagePharmacics,
+                            m.Pharmacy?.CloseTime,
+                            m.Pharmacy?.OpenTime,
+                            m.Pharmacy?.Latitude,
+                            m.Pharmacy?.Longitude,
+                        }
+                    })
+                };
+            }
+            else
+            {
+                return new
+                {
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Data = pagedMeds.Select(m => new
+                    {
+                        m.Id,
+                        m.TradeName,
+                        m.ScientificName,
+                        m.ImageMedicine,
+                        m.Dosage,
+                        m.DrugTiming,
+                        m.SideEffects,
+                        m.ContraindicatedDrugs,
+                        m.ManufacturerName,
+                        m.ProducingCompany,
+                        m.Price,
+                        Pharmacy = new
+                        {
+                            m.Pharmacy?.Id,
+                            m.Pharmacy?.Name,
+                            m.Pharmacy?.Address,
+                            m.Pharmacy?.ImagePharmacics,
+                            m.Pharmacy?.CloseTime,
+                            m.Pharmacy?.OpenTime,
+                            m.Pharmacy?.Latitude,
+                            m.Pharmacy?.Longitude,
+                        }
+                    })
+                };
+            }
+
+           
         }
 
 
@@ -182,6 +213,29 @@
 
             await _repo.DeleteAsync(medicine);
             return (true, "تم الحذف", medicine);
+        }
+
+        public async Task<List<MedicinforserchDto>> SerchForMedicineHome(string name)
+        {
+            var Serch = await _repo.SerchForMedicineHome(name);
+
+            return Serch.Select(m => new MedicinforserchDto
+            {
+                id = m.Id,
+                TradeName = m.TradeName,
+                ScientificName = m.ScientificName,
+                ImageMedicine = m.ImageMedicine,
+                Dosage = m.Dosage,
+                DrugTiming = m.DrugTiming,
+                SideEffects = m.SideEffects,
+                ContraindicatedDrugs = m.ContraindicatedDrugs,
+                ManufacturerName = m.ManufacturerName,
+                ProducingCompany = m.ProducingCompany,
+                Price = m.Price,
+                ExpiryDate = m.ExpiryDate,
+                PharmacyId = m.PharmacyId
+            }).ToList();
+
         }
     }
 }
