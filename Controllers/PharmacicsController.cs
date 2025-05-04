@@ -68,5 +68,40 @@ namespace Medicines.Controllers
 
             return Ok(new { message, pharmacy = data });
         }
+
+        [Authorize(Roles = "Admin,Practitioner")]
+        [HttpPost("approve-cancel/{orderId}")]
+        public async Task<IActionResult> ApproveOrCancelOrder(int orderId, [FromQuery] bool approve)
+        {
+            var (success, message) = await _service.ApproveOrCancelOrderAsync(orderId, approve);
+
+            if (!success)
+                return BadRequest(new { message });
+
+            return Ok(new { message });
+        }
+        [Authorize(Roles = "Admin,Practitioner")]
+        [HttpPost("mark-done/{orderId}")]
+        public async Task<IActionResult> MarkOrderAsDone(int orderId)
+        {
+            var (success, message) = await _service.MarkOrderAsDoneAsync(orderId);
+
+            if (!success)
+                return BadRequest(new { message });
+
+            return Ok(new { message });
+        }
+        [Authorize]
+        [HttpPost("cancel/{orderId}")]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            var (success, message) = await _service.CancelOrder(orderId);
+
+            if (!success)
+                return BadRequest(new { message });
+
+            return Ok(new { message });
+        }
+
     }
 }

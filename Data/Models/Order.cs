@@ -33,8 +33,18 @@ namespace Medicines.Data.Models
 
 
 
-
+        public OrderStatus Status { get; set; } = OrderStatus.Pending; 
         public decimal FinalPrice { get; set; }
     }
 
+
+
+    public enum OrderStatus
+    {
+        Pending = 0,
+        Accepted = 1,
+        Rejected = 2,
+        Canceled = 3,
+        Done = 4
+    }   
 }

@@ -62,6 +62,20 @@ namespace Medicines.Repositories
             _context.Pharmacies!.Remove(pharmacy);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Order?> GetOrderByIdAsync(int orderId)
+        {
+            return await _context.Orders!
+                .Where(o => o.Id == orderId)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task UpdateOrderAsync(Order order)
+        {
+            _context.Orders?.Update(order);
+            await _context.SaveChangesAsync();
+        }
+
     }
 
 }

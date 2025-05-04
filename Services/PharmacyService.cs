@@ -163,6 +163,67 @@
             await _repo.DeleteAsync(pharmacy);
             return (true, "تم الحذف", pharmacy);
         }
+
+
+        public async Task<(bool, string)> ApproveOrCancelOrderAsync(int orderId, bool approve)
+        {
+         
+            var order = await _repo.GetOrderByIdAsync(orderId);
+
+            if (order == null)
+                return (false, "الطلب غير موجود.");
+
+        
+            order.Status = approve ? OrderStatus.Accepted : OrderStatus.Rejected;
+
+          
+            await _repo.UpdateOrderAsync(order);
+
+           
+            return (true, approve ? "تمت الموافقة على الطلب." : "تم رفض  الطلب.");
+        }
+
+
+        public async Task<(bool, string)> CancelOrder(int orderId)
+        {
+
+            var order = await _repo.GetOrderByIdAsync(orderId);
+
+            if (order == null)
+                return (false, "الطلب غير موجود.");
+
+
+            order.Status =  OrderStatus.Canceled;
+
+
+            await _repo.UpdateOrderAsync(order);
+
+
+            return (true, "تم إلغاء الطلب.");
+        }
+
+
+        public async Task<(bool, string)> MarkOrderAsDoneAsync(int orderId)
+        {
+            var order = await _repo.GetOrderByIdAsync(orderId);
+
+            if (order == null)
+                return (false, "الطلب غير موجود.");
+
+          
+            if (order.Status != OrderStatus.Accepted && order.Status != OrderStatus.Pending)
+                return (false, "لا يمكن تغيير حالة الطلب إلى 'تم' من الحالة الحالية.");
+
+           
+            order.Status = OrderStatus.Done;
+
+           
+            await _repo.UpdateOrderAsync(order);
+
+            return (true, "تم إتمام الطلب بنجاح.");
+        }
+
+
     }
 
 }

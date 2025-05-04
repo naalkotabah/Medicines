@@ -35,6 +35,7 @@ public class OrderService : IOrderService
             PharmacyId = dto.PharmacyId,
             FinalPrice = finalPrice,
             OrderDate = DateTime.UtcNow,
+            Status = OrderStatus.Pending,
             OrderMedicines = medicines.Select(m => new OrderMedicine
             {
                 MedicineId = m.Id

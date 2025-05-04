@@ -1,4 +1,5 @@
 ﻿using Medicines.Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Medicines.Repositories.Interfaces
 {
@@ -12,6 +13,10 @@ namespace Medicines.Repositories.Interfaces
         Task AddAsync(Pharmacics pharmacy);
         Task UpdateAsync(Pharmacics pharmacy);
         Task DeleteAsync(Pharmacics pharmacy);
+
+        Task<Order?> GetOrderByIdAsync(int orderId);
+        Task UpdateOrderAsync(Order order);
+       
     }
 
 }

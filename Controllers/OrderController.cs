@@ -17,7 +17,7 @@ namespace Medicines.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin,Practitioner,User")]
+        [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDto orderDto)
         {
 
@@ -31,7 +31,7 @@ namespace Medicines.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin,Practitioner,User")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetOrders()
         {
             var orders = await _orderService.GetAllOrdersAsync();
