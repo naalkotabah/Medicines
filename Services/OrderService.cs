@@ -2,14 +2,17 @@
 using Medicines.Data.Models;
 using Medicines.Repositories.Interfaces;
 using Medicines.Services.Interfaces;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 public class OrderService : IOrderService
 {
     private readonly IOrderRepository _repo;
-
-    public OrderService(IOrderRepository repo)
+    private readonly IHubContext<NotificationHub> _hubContext;
+    public OrderService(IOrderRepository repo , IHubContext<NotificationHub> hubContext)
     {
         _repo = repo;
+        _hubContext = hubContext;
     }
 
     public async Task<(bool, string, object?)> CreateOrderAsync(OrderDto dto)
@@ -61,6 +64,10 @@ public class OrderService : IOrderService
             PharmacyName = pharmacyName,
             Medicines = medicines.Select(m => new { m.Id, m.TradeName, m.Price })
         };
+
+
+        var notificationMessage = $"طلب جديد من العميل {order.User!.Name} في {order.OrderDate}";
+        await _hubContext.Clients.Group(dto.PharmacyId.ToString()).SendAsync("ReceiveNotification", notificationMessage);
 
         return (true, "تم إنشاء الطلب", response);
     }
