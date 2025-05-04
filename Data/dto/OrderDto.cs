@@ -1,4 +1,5 @@
 ﻿using Medicines.Data.Models;
+using System.Text.Json.Serialization;
 
 namespace Medicines.Data.dto
 {
@@ -9,6 +10,7 @@ namespace Medicines.Data.dto
         public string? ChronicDiseases { get; set; }
         public string? DrugAllergy { get; set; }
         public string? Address { get; set; }
+        [JsonIgnore]
         public int UserId { get; set; }
         public int PharmacyId { get; set; }
         public List<int>? MedicineIds { get; set; } // قائمة معرفات الأدوية

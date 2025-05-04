@@ -7,8 +7,9 @@ namespace Medicines.Repositories.Interfaces
         Task AddOrderAsync(Order order);
         Task<List<Order>> GetOrdersWithDetailsAsync();
         Task<List<Medicine>> GetMedicinesByIdsAsync(List<int> ids);
-        Task<string?> GetUserNameByIdAsync(int userId);
-        Task<string?> GetPharmacyNameByIdAsync(int pharmacyId);
+        Task<List<Order>> GetOrdersByUserIdAsync(int userId);
+        Task<List<Order>> GetOrdersByPharmacyIdAsync(int pharmacyId);
+
     }
 
 }

@@ -7,7 +7,7 @@ namespace Medicines.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class OrderController : ControllerBase
+    public class OrderController : BaseController
     {
         private readonly IOrderService _orderService;
 
@@ -20,6 +20,8 @@ namespace Medicines.Controllers
         [Authorize(Roles = "Admin,Practitioner,User")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDto orderDto)
         {
+
+            orderDto.UserId = int.Parse(GetUserId()!);
             var (success, message, data) = await _orderService.CreateOrderAsync(orderDto);
 
             if (!success)
@@ -35,5 +37,60 @@ namespace Medicines.Controllers
             var orders = await _orderService.GetAllOrdersAsync();
             return Ok(orders);
         }
+
+
+        [HttpGet("user-orders")]
+        public async Task<IActionResult> GetOrdersByUserId()
+        {
+            var orders = await _orderService.GetOrdersByUserIdAsync(int.Parse(GetUserId()!));
+
+            if (orders == null || !orders.Any())
+                return NotFound("لا توجد طلبات لهذا المستخدم");
+
+            var result = orders.Select(o => new
+            {
+                o.Id,
+                o.OrderDate,
+                o.FinalPrice,
+                o.Address,
+                PharmacyName = o.Pharmacy?.Name,
+                Medicines = o.OrderMedicines.Select(om => new
+                {
+                    om.MedicineId,
+                    om.Medicine?.TradeName
+                }).ToList()
+            });
+
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpGet("pharmacy-orders/{pharmacyId}")]
+        public async Task<IActionResult> GetOrdersByPharmacyId(int pharmacyId)
+        {
+            var orders = await _orderService.GetOrdersByPharmacyIdAsync(pharmacyId);
+
+            if (orders == null || !orders.Any())
+                return NotFound("لا توجد طلبات لهذه الصيدلية");
+
+            var result = orders.Select(o => new
+            {
+                o.Id,
+                o.OrderDate,
+                o.FinalPrice,
+                o.Address,
+                CustomerName = o.User?.Name,
+                Medicines = o.OrderMedicines.Select(om => new
+                {
+                    om.MedicineId,
+                    om.Medicine?.TradeName
+                }).ToList()
+            });
+
+            return Ok(result);
+        }
+
+
+
     }
 }

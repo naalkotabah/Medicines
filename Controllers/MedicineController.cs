@@ -80,7 +80,7 @@ namespace Medicines.Controllers
 
 
         [HttpGet("search")]
-        public async Task<IActionResult> SearchForMedicineHome([FromQuery] string name)
+        public async Task<IActionResult> SearchForMedicineHome([FromQuery] [Required] string name)
         {
            
             if (string.IsNullOrWhiteSpace(name))
@@ -90,13 +90,6 @@ namespace Medicines.Controllers
 
     
             var medicines = await _medicineService.SerchForMedicineHome(name);
-
-    
-            if (medicines == null || medicines.Count == 0)
-            {
-                return NotFound("لم يتم العثور على أي دواء مطابق.");
-            }
-
          
             return Ok(medicines);
         }
