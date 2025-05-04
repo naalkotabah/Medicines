@@ -38,7 +38,7 @@ namespace Medicines.Controllers
             return Ok(orders);
         }
 
-
+        [Authorize]
         [HttpGet("user-orders")]
         public async Task<IActionResult> GetOrdersByUserId()
         {

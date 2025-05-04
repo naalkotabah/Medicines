@@ -70,7 +70,7 @@ namespace Medicines.Controllers
         }
 
         [Authorize(Roles = "Admin,Practitioner")]
-        [HttpPost("approve-cancel/{orderId}")]
+        [HttpPost("approve-Rejected/{orderId}")]
         public async Task<IActionResult> ApproveOrCancelOrder(int orderId, [FromQuery] bool approve)
         {
             var (success, message) = await _service.ApproveOrCancelOrderAsync(orderId, approve);
