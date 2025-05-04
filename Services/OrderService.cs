@@ -44,7 +44,7 @@ public class OrderService : IOrderService
         await _repo.AddOrderAsync(order);
 
       
-        var pharmacyName = await GetPharmacyNameByIdAsync(dto.PharmacyId);
+        var pharmacyName = await _repo.GetPharmacyNameByIdAsync(dto.PharmacyId);
 
         var response = new
         {

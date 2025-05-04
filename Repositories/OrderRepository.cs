@@ -60,7 +60,13 @@ namespace Medicines.Repositories
                 .ToListAsync();
         }
 
-
+        public async Task<string?> GetPharmacyNameByIdAsync(int pharmacyId)
+        {
+            return await _context.Pharmacies!
+                .Where(p => p.Id == pharmacyId)
+                .Select(p => p.Name)
+                .FirstOrDefaultAsync();
+        }
 
 
     }

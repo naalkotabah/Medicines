@@ -10,6 +10,9 @@ namespace Medicines.Repositories.Interfaces
         Task<List<Order>> GetOrdersByUserIdAsync(int userId);
         Task<List<Order>> GetOrdersByPharmacyIdAsync(int pharmacyId);
 
+
+        Task<string?> GetPharmacyNameByIdAsync(int pharmacyId)
+
     }
 
 }
