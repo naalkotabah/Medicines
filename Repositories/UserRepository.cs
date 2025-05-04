@@ -35,7 +35,7 @@ namespace Medicines.Repositories
             return await _context.Users!
                 .Include(u => u.Role)                        
                 .Include(u => u.Practitioner)                
-                    .ThenInclude(p => p.Pharmacy)            
+                    .ThenInclude(p => p!.Pharmacy)            
                 .FirstOrDefaultAsync(u => u.UserName == name && u.Password == password && !u.IsDleted);
         }
 
