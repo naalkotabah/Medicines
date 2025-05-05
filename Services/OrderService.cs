@@ -60,14 +60,18 @@ public class OrderService : IOrderService
             order.Address,
             order.OrderDate,
             order.FinalPrice,
+       
       
             PharmacyName = pharmacyName,
             Medicines = medicines.Select(m => new { m.Id, m.TradeName, m.Price })
         };
 
 
-        var notificationMessage = $"طلب جديد من العميل {order.User!.Name} في {order.OrderDate}";
+        var userName = order.User != null ? order.User.Name : "غير معروف";
+        var notificationMessage = $"طلب جديد من العميل {userName} في {order.OrderDate}";
+        Console.WriteLine($"إرسال إشعار: {notificationMessage}");
         await _hubContext.Clients.Group(dto.PharmacyId.ToString()).SendAsync("ReceiveNotification", notificationMessage);
+     
 
         return (true, "تم إنشاء الطلب", response);
     }

@@ -17,6 +17,9 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("myconnection")));
 
