@@ -147,8 +147,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
-app.MapHub<NotificationHub>("/notificationHub");  
-
+//app.MapHub<NotificationHub>("/notificationHub");
+app.MapHub<NotificationHub>("/api/notificationHub");
 
 app.MapControllers();
 
