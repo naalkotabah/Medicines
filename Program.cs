@@ -52,7 +52,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin",
         policy =>
         {
-            policy.WithOrigins("http://127.0.0.1:5500") // السماح بالنطاق المطلوب
+            policy.WithOrigins("http://localhost:5173") // السماح بالنطاق المطلوب
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
