@@ -49,14 +49,14 @@ builder.Services.AddScoped<IPractitionerService, PractitionerService>();
 // إعداد الـ CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:5173") // السماح بالنطاق المطلوب
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
+    options.AddPolicy("AllowAnyOrigin", policy =>
+    {
+        policy.AllowAnyOrigin()  
+              .AllowAnyHeader() 
+              .AllowAnyMethod(); 
+    });
 });
+
 
 // إعدادات JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

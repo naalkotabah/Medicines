@@ -69,6 +69,25 @@ namespace Medicines.Repositories
         }
 
 
+        public async Task<Practitioner> GetPractitionerByPharmacyIdAsync(int pharmacyId)
+        {
+            var practitioner = await _context.Practitioners!
+                .Include(p => p.Pharmacy)  // تحميل Pharmacy مع Practitioner
+                .FirstOrDefaultAsync(p => p.Pharmacy!.Id == pharmacyId);  // التحقق من PharmacyId
+
+            // تأكد أن Practitioner و Pharmacy غير null
+            if (practitioner == null || practitioner.Pharmacy == null)
+            {
+                return null!;  // أو يمكنك إرجاع رسالة خطأ
+            }
+
+            return practitioner;
+        }
+
+
+
+
+
     }
 
 }

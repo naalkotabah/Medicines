@@ -1,4 +1,5 @@
 ﻿using Medicines.Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Medicines.Repositories.Interfaces
 {
@@ -10,6 +11,9 @@ namespace Medicines.Repositories.Interfaces
         Task<List<Order>> GetOrdersByUserIdAsync(int userId);
         Task<List<Order>> GetOrdersByPharmacyIdAsync(int pharmacyId);
 
+        Task<Practitioner> GetPractitionerByPharmacyIdAsync(int pharmacyId);
+        
+       
 
         Task<string?> GetPharmacyNameByIdAsync(int pharmacyId);
 

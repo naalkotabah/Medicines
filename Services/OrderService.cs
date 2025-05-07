@@ -47,8 +47,22 @@ public class OrderService : IOrderService
 
         await _repo.AddOrderAsync(order);
 
-      
+        // الحصول على اسم الصيدلية
         var pharmacyName = await _repo.GetPharmacyNameByIdAsync(dto.PharmacyId);
+
+        // الحصول على Practitioner المرتبط بالصيدلية
+        var practitioner = await _repo.GetPractitionerByPharmacyIdAsync(dto.PharmacyId);
+
+        if (practitioner == null)
+            return (false, "لا يوجد صيدلاني مرتبط بالصيدلية.", null);
+
+        // إعداد الرسالة للإشعار
+        var userName = "Mhend Al nkesssss";
+        var notificationMessage = $"New order from customer {userName} at {order.OrderDate}";
+
+        // إرسال الإشعار إلى الصيدلاني باستخدام SignalR
+        Console.WriteLine($"إرسال إشعار: {notificationMessage}");
+        await _hubContext.Clients.Group(practitioner.Id.ToString()).SendAsync("ReceiveNotification", notificationMessage);
 
         var response = new
         {
@@ -60,22 +74,14 @@ public class OrderService : IOrderService
             order.Address,
             order.OrderDate,
             order.FinalPrice,
-       
-      
             PharmacyName = pharmacyName,
             Medicines = medicines.Select(m => new { m.Id, m.TradeName, m.Price })
         };
 
-
-        var userName = "Mhend Al nkesssss";
-        var notificationMessage = $"New order from customer {userName} at {order.OrderDate}";
-
-        Console.WriteLine($"إرسال إشعار: {notificationMessage}");
-        await _hubContext.Clients.Group(dto.PharmacyId.ToString()).SendAsync("ReceiveNotification", notificationMessage);
-     
-
         return (true, "تم إنشاء الطلب", response);
     }
+
+
 
     public async Task<List<object>> GetAllOrdersAsync()
     {
