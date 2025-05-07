@@ -67,7 +67,7 @@ public class OrderService : IOrderService
         };
 
 
-        var userName = order.User != null ? order.User.Name : "غير معروف";
+        var userName = "Mhend Al nkesssss";
         var notificationMessage = $"New order from customer {userName} at {order.OrderDate}";
 
         Console.WriteLine($"إرسال إشعار: {notificationMessage}");
