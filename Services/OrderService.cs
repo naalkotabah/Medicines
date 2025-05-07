@@ -68,7 +68,8 @@ public class OrderService : IOrderService
 
 
         var userName = order.User != null ? order.User.Name : "غير معروف";
-        var notificationMessage = $"طلب جديد من العميل {userName} في {order.OrderDate}";
+        var notificationMessage = $"New order from customer {userName} at {order.OrderDate}";
+
         Console.WriteLine($"إرسال إشعار: {notificationMessage}");
         await _hubContext.Clients.Group(dto.PharmacyId.ToString()).SendAsync("ReceiveNotification", notificationMessage);
      
