@@ -52,8 +52,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAnyOrigin", policy =>
 
     {
-        policy.WithOrigins("https://medicines-production.up.railway.app")
-              .AllowAnyHeader()
+        policy.WithOrigins("http://localhost:5173","http://127.0.0.1:5500")
+               .AllowAnyHeader()
               .AllowAnyMethod();
     
     });
