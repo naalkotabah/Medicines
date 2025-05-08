@@ -50,10 +50,13 @@ builder.Services.AddScoped<IPractitionerService, PractitionerService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAnyOrigin", policy =>
+
     {
-        policy.AllowAnyOrigin()  
-              .AllowAnyHeader() 
-              .AllowAnyMethod(); 
+        policy.WithOrigins("http://localhost:5173") 
+              .AllowAnyOrigin() 
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    
     });
 });
 
