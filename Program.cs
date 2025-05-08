@@ -49,7 +49,7 @@ builder.Services.AddScoped<IPractitionerService, PractitionerService>();
 // إعداد الـ CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAnyOrigin", policy =>
+    options.AddPolicy("AllowSpecificOrigin", policy =>
 
     {
         policy.WithOrigins("http://localhost:5173","http://127.0.0.1:5500")
