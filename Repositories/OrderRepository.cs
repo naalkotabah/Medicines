@@ -27,26 +27,34 @@ namespace Medicines.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<Order>> GetOrdersByUserIdAsync(int userId)
+        public async Task<List<Order>> GetOrdersByUserIdAsync(int userId, int pageNumber, int pageSize)
         {
             return await _context.Orders!
                 .Where(o => o.UserId == userId)
                 .Include(o => o.Pharmacy)
                 .Include(o => o.OrderMedicines)
                     .ThenInclude(om => om.Medicine)
+                .OrderByDescending(o => o.OrderDate)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
         }
 
 
-        public async Task<List<Order>> GetOrdersByPharmacyIdAsync(int pharmacyId)
+
+        public async Task<List<Order>> GetOrdersByPharmacyIdAsync(int pharmacyId, int pageNumber, int pageSize)
         {
             return await _context.Orders!
                 .Where(o => o.PharmacyId == pharmacyId)
                 .Include(o => o.User)
                 .Include(o => o.OrderMedicines)
                     .ThenInclude(om => om.Medicine)
+                .OrderByDescending(o => o.OrderDate)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
         }
+
 
 
 

@@ -107,16 +107,17 @@ public class OrderService : IOrderService
 
 
 
-    public async Task<List<Order>> GetOrdersByUserIdAsync(int userId)
+    public async Task<List<Order>> GetOrdersByUserIdAsync(int userId, int pageNumber, int pageSize)
     {
-        return await _repo.GetOrdersByUserIdAsync(userId);
+        return await _repo.GetOrdersByUserIdAsync(userId, pageNumber, pageSize);
     }
 
 
-    public async Task<List<Order>> GetOrdersByPharmacyIdAsync(int pharmacyId)
+    public async Task<List<Order>> GetOrdersByPharmacyIdAsync(int pharmacyId, int pageNumber, int pageSize)
     {
-        return await _repo.GetOrdersByPharmacyIdAsync(pharmacyId);
+        return await _repo.GetOrdersByPharmacyIdAsync(pharmacyId, pageNumber, pageSize);
     }
+
 
 
     public async Task<List<Medicine>> GetMedicinesByIdsAsync(List<int> ids)

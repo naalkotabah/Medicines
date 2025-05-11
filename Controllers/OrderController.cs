@@ -40,9 +40,11 @@ namespace Medicines.Controllers
 
         [Authorize]
         [HttpGet("user-orders")]
-        public async Task<IActionResult> GetOrdersByUserId()
+   
+        public async Task<IActionResult> GetOrdersByUserId(int pageNumber = 1, int pageSize = 10)
         {
-            var orders = await _orderService.GetOrdersByUserIdAsync(int.Parse(GetUserId()!));
+            var userId = int.Parse(GetUserId()!);
+            var orders = await _orderService.GetOrdersByUserIdAsync(userId, pageNumber, pageSize);
 
             if (orders == null || !orders.Any())
                 return NotFound("لا توجد طلبات لهذا المستخدم");
@@ -61,14 +63,20 @@ namespace Medicines.Controllers
                 }).ToList()
             });
 
-            return Ok(result);
+            return Ok(new
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                Orders = result
+            });
         }
+
 
         [Authorize]
         [HttpGet("pharmacy-orders/{pharmacyId}")]
-        public async Task<IActionResult> GetOrdersByPharmacyId(int pharmacyId)
+        public async Task<IActionResult> GetOrdersByPharmacyId(int pharmacyId, int pageNumber = 1, int pageSize = 10)
         {
-            var orders = await _orderService.GetOrdersByPharmacyIdAsync(pharmacyId);
+            var orders = await _orderService.GetOrdersByPharmacyIdAsync(pharmacyId, pageNumber, pageSize);
 
             if (orders == null || !orders.Any())
                 return NotFound("لا توجد طلبات لهذه الصيدلية");
@@ -87,8 +95,14 @@ namespace Medicines.Controllers
                 }).ToList()
             });
 
-            return Ok(result);
+            return Ok(new
+            {
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                Orders = result
+            });
         }
+
 
 
 

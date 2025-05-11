@@ -10,8 +10,8 @@
 
 
 
-        Task<List<Order>> GetOrdersByUserIdAsync(int userId);
-        Task<List<Order>> GetOrdersByPharmacyIdAsync(int pharmacyId);
+        Task<List<Order>> GetOrdersByUserIdAsync(int userId, int pageNumber, int pageSize);
+        Task<List<Order>> GetOrdersByPharmacyIdAsync(int pharmacyId, int pageNumber, int pageSize);
 
         Task<List<Medicine>> GetMedicinesByIdsAsync(List<int> ids);
         Task<List<Order>> GetOrdersWithDetailsAsync();
