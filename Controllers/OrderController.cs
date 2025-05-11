@@ -53,9 +53,12 @@ namespace Medicines.Controllers
             {
                 o.Id,
                 o.OrderDate,
+              Status = o.Status.ToString(),
+
                 o.FinalPrice,
                 o.Address,
                 PharmacyName = o.Pharmacy?.Name,
+
                 Medicines = o.OrderMedicines.Select(om => new
                 {
                     om.MedicineId,
@@ -87,6 +90,7 @@ namespace Medicines.Controllers
                 o.OrderDate,
                 o.FinalPrice,
                 o.Address,
+                Status = o.Status.ToString(),
                 CustomerName = o.User?.Name,
                 Medicines = o.OrderMedicines.Select(om => new
                 {
