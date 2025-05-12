@@ -18,7 +18,7 @@ namespace Medicines.Data.Models
 
 
         public int RoleId { get; set; }
-        public Roles? Role { get; set; } 
+        public Roles? Role { get; set; }  // fuuuuuussssfussss
 
         public ICollection<Order>? Orders { get; set; } = new List<Order>();
 
