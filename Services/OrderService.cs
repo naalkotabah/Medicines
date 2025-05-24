@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 public class OrderService : IOrderService
 {
     private readonly IOrderRepository _repo;
-    private readonly IHubContext<NotificationHub> _hubContext;
-    public OrderService(IOrderRepository repo , IHubContext<NotificationHub> hubContext)
+    private readonly IHubContext<OrderHub> _hubContext;
+    public OrderService(IOrderRepository repo , IHubContext<OrderHub> hubContext)
     {
         _repo = repo;
         _hubContext = hubContext;
@@ -56,13 +56,7 @@ public class OrderService : IOrderService
         if (practitioner == null)
             return (false, "لا يوجد صيدلاني مرتبط بالصيدلية.", null);
 
-        // إعداد الرسالة للإشعار
-        var userName = "Mhend Al nkesssss";
-        var notificationMessage = $"New order from customer {userName} at {order.OrderDate}";
-
-        // إرسال الإشعار إلى الصيدلاني باستخدام SignalR
-        Console.WriteLine($"إرسال إشعار: {notificationMessage}");
-        await _hubContext.Clients.Group(practitioner.Id.ToString()).SendAsync("ReceiveNotification", notificationMessage);
+    
 
         var response = new
         {

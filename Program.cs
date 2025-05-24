@@ -52,10 +52,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin", policy =>
 
     {
-        policy.WithOrigins("http://localhost:5173","http://127.0.0.1:5500")
+        policy.WithOrigins("http://localhost:5173","http://127.0.0.1:5500", "http://localhost:7000")
                .AllowAnyHeader()
-              .AllowAnyMethod();
-    
+              .AllowAnyMethod()
+        .AllowCredentials();
+
     });
 });
 
@@ -132,7 +133,7 @@ app.UseSwaggerUI();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
 
-app.UseCors("AllowSpecificOrigin");
+
 
 
 app.UseHttpsRedirection();
@@ -144,13 +145,13 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads"
 });
 
-
+app.UseCors("AllowSpecificOrigin");
 app.UseAuthentication();
 app.UseAuthorization();
 
 
-//app.MapHub<NotificationHub>("/notificationHub");
-app.MapHub<NotificationHub>("/api/notificationHub");
+
+app.MapHub<OrderHub>("/api/OrderHub");
 
 app.MapControllers();
 

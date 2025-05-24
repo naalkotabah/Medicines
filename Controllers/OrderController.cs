@@ -2,6 +2,7 @@
 using Medicines.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Medicines.Controllers
 {
@@ -10,10 +11,12 @@ namespace Medicines.Controllers
     public class OrderController : BaseController
     {
         private readonly IOrderService _orderService;
+        private readonly IHubContext<OrderHub> _hub;
 
-        public OrderController(IOrderService orderService)
+        public OrderController(IOrderService orderService, IHubContext<OrderHub> hub)
         {
             _orderService = orderService;
+            _hub = hub;
         }
 
         [HttpPost]
@@ -26,6 +29,9 @@ namespace Medicines.Controllers
 
             if (!success)
                 return BadRequest(new { message });
+
+            await _hub.Clients.Group($"pharmacy-{orderDto.PharmacyId}")
+             .SendAsync("ReceiveNewOrder", data);
 
             return Ok(new { message, order = data });
         }
